@@ -8,6 +8,8 @@ use ExponentPhpSDK\ExpoRepository;
 use ExponentPhpSDK\Repositories\ExpoFileDriver;
 use Illuminate\Support\ServiceProvider;
 use NotificationChannels\ExpoPushNotifications\Repositories\ExpoDatabaseDriver;
+use Illuminate\Support\Facades\Route;
+
 
 class ExpoPushNotificationsServiceProvider extends ServiceProvider
 {
@@ -18,6 +20,8 @@ class ExpoPushNotificationsServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        Route::mixin(new ExpoRouter());
+
         $this->setupConfig();
 
         $repository = $this->getInterestsDriver();
