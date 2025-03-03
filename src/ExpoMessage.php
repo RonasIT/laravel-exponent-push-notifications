@@ -14,13 +14,6 @@ class ExpoMessage
     protected $title;
 
     /**
-     * The message body.
-     *
-     * @var string
-     */
-    protected $body;
-
-    /**
      * The sound to play when the recipient receives this notification.
      *
      * @var string|null
@@ -79,9 +72,8 @@ class ExpoMessage
      *
      * @param  string  $body
      */
-    public function __construct(string $body = '')
+    public function __construct(protected string $body = '')
     {
-        $this->body = $body;
     }
 
     /**

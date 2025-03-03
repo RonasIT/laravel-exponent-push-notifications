@@ -11,15 +11,6 @@ use NotificationChannels\ExpoPushNotifications\Exceptions\CouldNotSendNotificati
 
 class ExpoChannel
 {
-    /**
-     * @var Dispatcher
-     */
-    private $events;
-
-    /**
-     * @var Expo
-     */
-    public $expo;
 
     /**
      * ExpoChannel constructor.
@@ -27,10 +18,11 @@ class ExpoChannel
      * @param  Expo  $expo
      * @param  Dispatcher  $events
      */
-    public function __construct(Expo $expo, Dispatcher $events)
+    public function __construct(
+        public Expo $expo,
+        private Dispatcher $events,
+    )
     {
-        $this->events = $events;
-        $this->expo = $expo;
     }
 
     /**

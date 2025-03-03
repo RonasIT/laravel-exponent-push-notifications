@@ -12,19 +12,12 @@ use NotificationChannels\ExpoPushNotifications\ExpoChannel;
 class ExpoController extends Controller
 {
     /**
-     * @var ExpoChannel
-     */
-    private $expoChannel;
-
-    /**
      * ExpoController constructor.
      *
      * @param  ExpoChannel  $expoChannel
      */
-    public function __construct(ExpoChannel $expoChannel)
-    {
-        $this->expoChannel = $expoChannel;
-    }
+    public function __construct(private readonly ExpoChannel $expoChannel)
+    {}
 
     /**
      * Handles subscription endpoint for an expo token.
