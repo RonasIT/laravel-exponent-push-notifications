@@ -28,7 +28,7 @@ class ExpoRouter
             $this->controller(ExpoController::class)->group(
                 [
                     'prefix' => 'exponent/devices',
-                    'middleware' => 'expo.middleware'
+                    'middleware' => 'expo.middleware',
                 ],
                 function () use ($defaultOptions) {
                     when($defaultOptions['subscribe'], fn () => $this->post('subscribe', 'subscribe'));
