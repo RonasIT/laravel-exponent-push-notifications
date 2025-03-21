@@ -10,5 +10,4 @@ Route::prefix('exponent/devices')
             Route::post('subscribe', 'subscribe');
             Route::post('unsubscribe', 'unsubscribe');
         });
-    }
-    );
+    });

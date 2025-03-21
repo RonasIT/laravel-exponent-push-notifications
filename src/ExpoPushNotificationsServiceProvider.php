@@ -10,7 +10,6 @@ use Illuminate\Support\ServiceProvider;
 use NotificationChannels\ExpoPushNotifications\Repositories\ExpoDatabaseDriver;
 use Illuminate\Support\Facades\Route;
 
-
 class ExpoPushNotificationsServiceProvider extends ServiceProvider
 {
     /**

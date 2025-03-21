@@ -15,10 +15,9 @@ class ExpoRouter
         return function (ExpoRouterActionEnum ...$options) {
             ExpoRouter::$isBlockedBaseRoutes = true;
 
-            $defaultOptions = [
-                'subscribe' => true,
-                'unsubscribe' => true,
-            ];
+            $routerActions = array_column(ExpoRouterActionEnum::cases(), 'value');
+
+            $defaultOptions = array_fill_keys($routerActions, true);
 
             if (!empty($options)) {
                 $options = collect($options);
@@ -27,10 +26,13 @@ class ExpoRouter
             }
 
             $this->controller(ExpoController::class)->group(
-                ['prefix' => 'exponent/devices', 'middleware' => 'expo.middleware'],
+                [
+                    'prefix' => 'exponent/devices',
+                    'middleware' => 'expo.middleware'
+                ],
                 function () use ($defaultOptions) {
-                    when($defaultOptions['subscribe'], fn() => $this->post('subscribe', 'subscribe'));
-                    when($defaultOptions['unsubscribe'], fn() => $this->post('unsubscribe', 'unsubscribe'));
+                    when($defaultOptions['subscribe'], fn () => $this->post('subscribe', 'subscribe'));
+                    when($defaultOptions['unsubscribe'], fn () => $this->post('unsubscribe', 'unsubscribe'));
                 }
             );
         };
