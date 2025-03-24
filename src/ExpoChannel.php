@@ -19,7 +19,7 @@ class ExpoChannel
      */
     public function __construct(
         public Expo $expo,
-        private Dispatcher $events,
+        private Dispatcher $events
     ) {
     }
 
