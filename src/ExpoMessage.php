@@ -72,8 +72,9 @@ class ExpoMessage
      *
      * @param  string  $body
      */
-    public function __construct(protected string $body = '')
-    {
+    public function __construct(
+        protected string $body = ''
+    ) {
     }
 
     /**

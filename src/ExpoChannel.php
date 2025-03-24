@@ -11,7 +11,6 @@ use NotificationChannels\ExpoPushNotifications\Exceptions\CouldNotSendNotificati
 
 class ExpoChannel
 {
-
     /**
      * ExpoChannel constructor.
      *
@@ -21,8 +20,7 @@ class ExpoChannel
     public function __construct(
         public Expo $expo,
         private Dispatcher $events,
-    )
-    {
+    ) {
     }
 
     /**
