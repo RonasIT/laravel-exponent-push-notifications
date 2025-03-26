@@ -31,7 +31,8 @@ class ExpoRouter
                     'middleware' => 'expo.middleware',
                 ],
                 function () use ($defaultOptions) {
-                    when($defaultOptions['subscribe'], fn () => $this->post('subscribe', 'subscribe'));
+                    when($defaultOptions['subscribe'], $this->post('subscribe', 'subscribe'));
+                    when($defaultOptions['unsubscribe'], $this->post('unsubscribe', 'unsubscribe'));
                     when($defaultOptions['unsubscribe'], fn () => $this->post('unsubscribe', 'unsubscribe'));
                 }
             );
