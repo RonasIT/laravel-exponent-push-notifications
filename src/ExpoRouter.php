@@ -33,7 +33,6 @@ class ExpoRouter
                 function () use ($defaultOptions) {
                     when($defaultOptions['subscribe'], $this->post('subscribe', 'subscribe'));
                     when($defaultOptions['unsubscribe'], $this->post('unsubscribe', 'unsubscribe'));
-                    when($defaultOptions['unsubscribe'], fn () => $this->post('unsubscribe', 'unsubscribe'));
                 }
             );
         };
