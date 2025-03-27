@@ -25,16 +25,13 @@ class ExpoRouter
                 $defaultOptions = Arr::map($defaultOptions, fn ($value, $defaultOption) => $options->contains('value', $defaultOption));
             }
 
-            $this->controller(ExpoController::class)->group(
-                [
-                    'prefix' => 'exponent/devices',
-                    'middleware' => 'expo.middleware',
-                ],
-                function () use ($defaultOptions) {
-                    when($defaultOptions['subscribe'], $this->post('subscribe', 'subscribe'));
-                    when($defaultOptions['unsubscribe'], $this->post('unsubscribe', 'unsubscribe'));
-                }
-            );
+            $this->controller(ExpoController::class)->group([
+                'prefix' => 'exponent/devices',
+                'middleware' => 'expo.middleware',
+            ], function () use ($defaultOptions) {
+                when($defaultOptions['subscribe'], $this->post('subscribe', 'subscribe'));
+                when($defaultOptions['unsubscribe'], $this->post('unsubscribe', 'unsubscribe'));
+            });
         };
     }
 }
