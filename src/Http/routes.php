@@ -1,13 +1,13 @@
 <?php
 
-Route::group(['prefix' => 'api/exponent/devices', 'middleware' => 'expo.middleware'], function () {
-    Route::post('subscribe', [
-        'as'    =>  'register-interest',
-        'uses'  =>  'NotificationChannels\ExpoPushNotifications\Http\ExpoController@subscribe',
-    ]);
+use NotificationChannels\ExpoPushNotifications\Http\ExpoController;
+use Illuminate\Support\Facades\Route;
 
-    Route::post('unsubscribe', [
-        'as'    =>  'remove-interest',
-        'uses'  =>  'NotificationChannels\ExpoPushNotifications\Http\ExpoController@unsubscribe',
-    ]);
-});
+Route::prefix('exponent/devices')
+    ->middleware('expo.middleware')
+    ->group(function () {
+        Route::controller(ExpoController::class)->group(function () {
+            Route::post('subscribe', 'subscribe');
+            Route::post('unsubscribe', 'unsubscribe');
+        });
+    });
