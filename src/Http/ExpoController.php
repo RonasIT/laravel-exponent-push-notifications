@@ -11,23 +11,12 @@ use NotificationChannels\ExpoPushNotifications\ExpoChannel;
 
 class ExpoController extends Controller
 {
-    /**
-     * ExpoController constructor.
-     *
-     * @param  ExpoChannel  $expoChannel
-     */
     public function __construct(
-        private readonly ExpoChannel $expoChannel
+        private readonly ExpoChannel $expoChannel,
     ) {
     }
 
-    /**
-     * Handles subscription endpoint for an expo token.
-     *
-     * @param  Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function subscribe(Request $request)
+    public function subscribe(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'expo_token'    =>  'required|string',
@@ -63,13 +52,7 @@ class ExpoController extends Controller
         ], 200);
     }
 
-    /**
-     * Handles removing subscription endpoint for the authenticated interest.
-     *
-     * @param  Request  $request
-     * @return JsonResponse
-     */
-    public function unsubscribe(Request $request)
+    public function unsubscribe(Request $request): JsonResponse
     {
         $interest = $this->expoChannel->interestName(Auth::user());
 
