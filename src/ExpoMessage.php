@@ -20,7 +20,7 @@ class ExpoMessage
 
     protected string $priority = 'default';
 
-    public static function create($body = ''): static
+    public static function create(string $body = ''): static
     {
         return new static($body);
     }
