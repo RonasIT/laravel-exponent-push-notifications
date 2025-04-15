@@ -6,20 +6,6 @@ use NotificationChannels\ExpoPushNotifications\Exceptions\CouldNotCreateMessage;
 
 class ExpoMessage
 {
-    protected string $title;
-
-    protected ?string $sound = 'default';
-
-    protected int $badge = 0;
-
-    protected int $ttl = 0;
-
-    protected string $channelId = '';
-
-    protected string $jsonData = '{}';
-
-    protected string $priority = 'default';
-
     public static function create(string $body = ''): static
     {
         return new static($body);
@@ -27,6 +13,20 @@ class ExpoMessage
 
     public function __construct(
         protected string $body = '',
+
+        protected ?string $title = null,
+
+        protected ?string $sound = 'default',
+
+        protected int $badge = 0,
+
+        protected int $ttl = 0,
+
+        protected string $channelId = '',
+
+        protected string $jsonData = '{}',
+
+        protected string $priority = 'default',
     ) {
     }
 
@@ -79,7 +79,7 @@ class ExpoMessage
         return $this;
     }
 
-    public function setJsonData($data): self
+    public function setJsonData(array|string $data): self
     {
         if (is_array($data)) {
             $data = json_encode($data);
