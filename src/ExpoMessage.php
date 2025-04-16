@@ -2,6 +2,7 @@
 
 namespace NotificationChannels\ExpoPushNotifications;
 
+use NotificationChannels\ExpoPushNotifications\Enums\InterruptionLevelEnum;
 use NotificationChannels\ExpoPushNotifications\Exceptions\CouldNotCreateMessage;
 
 class ExpoMessage
@@ -79,8 +80,11 @@ class ExpoMessage
      *
      * @param  string  $body
      */
-    public function __construct(string $body = '')
-    {
+    public function __construct(
+        string $body = '',
+
+        protected InterruptionLevelEnum $interruptionLevel = InterruptionLevelEnum::Active,
+    ) {
         $this->body = $body;
     }
 
@@ -106,6 +110,13 @@ class ExpoMessage
     public function body(string $value)
     {
         $this->body = $value;
+
+        return $this;
+    }
+
+    public function interruptionLevel(InterruptionLevelEnum $value): self
+    {
+        $this->interruptionLevel = $value;
 
         return $this;
     }
@@ -226,8 +237,9 @@ class ExpoMessage
             'ttl'       =>  $this->ttl,
             'data'      =>  $this->jsonData,
             'priority'  =>  $this->priority,
+            'interruptionLevel'  =>  $this->interruptionLevel->value,
         ];
-        if (! empty($this->channelId)) {
+        if (!empty($this->channelId)) {
             $message['channelId'] = $this->channelId;
         }
 
