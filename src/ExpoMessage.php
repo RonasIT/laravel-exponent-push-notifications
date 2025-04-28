@@ -74,10 +74,9 @@ class ExpoMessage
      * @param string $body
      */
     public function __construct(
-        string $body = '',
+        protected string $body = '',
         protected InterruptionLevelEnum $interruptionLevel = InterruptionLevelEnum::Active,
     ) {
-        $this->body = $body;
     }
 
     /**
