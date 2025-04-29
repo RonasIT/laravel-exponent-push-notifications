@@ -75,7 +75,7 @@ class ExpoMessage
      */
     public function __construct(
         protected string $body = '',
-        protected InterruptionLevelEnum $interruptionLevel = InterruptionLevelEnum::Active,
+        protected ?InterruptionLevelEnum $interruptionLevel = null,
     ) {
     }
 
