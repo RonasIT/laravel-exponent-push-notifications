@@ -228,10 +228,14 @@ class ExpoMessage
             'ttl' => $this->ttl,
             'data' => $this->jsonData,
             'priority' => $this->priority,
-            'interruptionLevel' => $this->interruptionLevel->value,
         ];
+
         if (!empty($this->channelId)) {
             $message['channelId'] = $this->channelId;
+        }
+
+        if(!empty($this->interruptionLevel)){
+            $message['interruptionLevel'] = $this->interruptionLevel->value;
         }
 
         return $message;
