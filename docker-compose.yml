@@ -1,0 +1,25 @@
+services:
+    nginx:
+        image: ghcr.io/ronasit/php-nginx-dev:8.3
+        working_dir: /app
+        ports:
+            - 80:80
+            - 443:443
+        volumes:
+            - .:/app
+        links:
+            - pgsql
+        user: root
+
+    pgsql:
+        image: ronasit/postgres:12.5
+        ports:
+            - 5432:5432
+        environment:
+            POSTGRES_PASSWORD: secret
+            POSTGRES_USER: forge
+            POSTGRES_DB: forge
+            POSTGRES_HOST_AUTH_METHOD: trust
+        volumes:
+            - .:/app
+        command: ["-c", "fsync=off"]

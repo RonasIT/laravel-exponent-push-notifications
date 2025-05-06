@@ -2,31 +2,26 @@
 
 namespace NotificationChannels\ExpoPushNotifications;
 
+use NotificationChannels\ExpoPushNotifications\Enums\InterruptionLevelEnum;
 use NotificationChannels\ExpoPushNotifications\Exceptions\CouldNotCreateMessage;
 
 class ExpoMessage
 {
-    public static function create(string $body = ''): static
+    static function create(string $body = ''): static
     {
         return new static($body);
     }
 
     public function __construct(
         protected string $body = '',
-
         protected ?string $title = null,
-
         protected ?string $sound = 'default',
-
         protected int $badge = 0,
-
         protected int $ttl = 0,
-
         protected string $channelId = '',
-
         protected string $jsonData = '{}',
-
         protected string $priority = 'default',
+        protected ?InterruptionLevelEnum $interruptionLevel = null,
     ) {
     }
 
@@ -40,6 +35,13 @@ class ExpoMessage
     public function body(string $value): self
     {
         $this->body = $value;
+
+        return $this;
+    }
+
+    public function setInterruptionLevel(InterruptionLevelEnum $value): self
+    {
+        $this->interruptionLevel = $value;
 
         return $this;
     }
@@ -106,16 +108,21 @@ class ExpoMessage
     public function toArray(): array
     {
         $message = [
-            'title'     =>  $this->title,
-            'body'      =>  $this->body,
-            'sound'     =>  $this->sound,
-            'badge'     =>  $this->badge,
-            'ttl'       =>  $this->ttl,
-            'data'      =>  $this->jsonData,
-            'priority'  =>  $this->priority,
+            'title' => $this->title,
+            'body' => $this->body,
+            'sound' => $this->sound,
+            'badge' => $this->badge,
+            'ttl' => $this->ttl,
+            'data' => $this->jsonData,
+            'priority' => $this->priority,
         ];
-        if (! empty($this->channelId)) {
+
+        if (!empty($this->channelId)) {
             $message['channelId'] = $this->channelId;
+        }
+
+        if (!empty($this->interruptionLevel)) {
+            $message['interruptionLevel'] = $this->interruptionLevel->value;
         }
 
         return $message;
