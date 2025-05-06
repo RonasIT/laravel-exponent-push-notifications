@@ -7,7 +7,7 @@ use NotificationChannels\ExpoPushNotifications\Exceptions\CouldNotCreateMessage;
 
 class ExpoMessage
 {
-    static function create(string $body = ''): static
+    public static function create(string $body = ''): static
     {
         return new static($body);
     }
