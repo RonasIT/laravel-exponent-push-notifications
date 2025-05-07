@@ -7,98 +7,32 @@ use NotificationChannels\ExpoPushNotifications\Exceptions\CouldNotCreateMessage;
 
 class ExpoMessage
 {
-    /**
-     * The message title.
-     *
-     * @var string
-     */
-    protected $title;
-
-    /**
-     * The sound to play when the recipient receives this notification.
-     *
-     * @var string|null
-     */
-    protected $sound = 'default';
-
-    /**
-     * The number to display next to the push notification (iOS).
-     * Specify zero to clear the badge.
-     *
-     * @var int
-     */
-    protected $badge = 0;
-
-    /**
-     * The number of seconds for which the message may be kept around for redelivery if it has not been delivered yet.
-     *
-     * @var int
-     */
-    protected $ttl = 0;
-
-    /**
-     * ID of the Notification Channel through which to display this notification on Android devices.
-     *
-     * @var string
-     */
-    protected $channelId = '';
-
-    /**
-     * The json data attached to the message.
-     *
-     * @var string
-     */
-    protected $jsonData = '{}';
-
-    /**
-     * The priority of notification message for Android devices.
-     *
-     * @var string
-     */
-    protected $priority = 'default';
-
-    /**
-     * Create a message with given body.
-     *
-     * @param string $body
-     * @return static
-     */
-    public static function create($body = '')
+    public static function create(string $body = ''): static
     {
         return new static($body);
     }
 
-    /**
-     * ExpoMessage constructor.
-     *
-     * @param string $body
-     */
     public function __construct(
         protected string $body = '',
+        protected ?string $title = null,
+        protected ?string $sound = 'default',
+        protected int $badge = 0,
+        protected int $ttl = 0,
+        protected string $channelId = '',
+        protected string $jsonData = '{}',
+        protected string $priority = 'default',
         protected ?InterruptionLevelEnum $interruptionLevel = null,
     ) {
     }
 
-    /**
-     * Set the message title.
-     *
-     * @param string $value
-     * @return $this
-     */
-    public function title(string $value)
+    public function title(string $value): self
     {
         $this->title = $value;
 
         return $this;
     }
 
-    /**
-     * Set the message body.
-     *
-     * @param string $value
-     * @return $this
-     */
-    public function body(string $value)
+    public function body(string $value): self
     {
         $this->body = $value;
 
@@ -112,78 +46,42 @@ class ExpoMessage
         return $this;
     }
 
-    /**
-     * Enable the message sound.
-     *
-     * @return $this
-     */
-    public function enableSound()
+    public function enableSound(): self
     {
         $this->sound = 'default';
 
         return $this;
     }
 
-    /**
-     * Disable the message sound.
-     *
-     * @return $this
-     */
-    public function disableSound()
+    public function disableSound(): self
     {
         $this->sound = null;
 
         return $this;
     }
 
-    /**
-     * Set the message badge (iOS).
-     *
-     * @param int $value
-     * @return $this
-     */
-    public function badge(int $value)
+    public function badge(int $value): self
     {
         $this->badge = $value;
 
         return $this;
     }
 
-    /**
-     * Set the time to live of the notification.
-     *
-     * @param int $ttl
-     * @return $this
-     */
-    public function setTtl(int $ttl)
+    public function setTtl(int $ttl): self
     {
         $this->ttl = $ttl;
 
         return $this;
     }
 
-    /**
-     * Set the channelId of the notification for Android devices.
-     *
-     * @param string $channelId
-     * @return $this
-     */
-    public function setChannelId(string $channelId)
+    public function setChannelId(string $channelId): self
     {
         $this->channelId = $channelId;
 
         return $this;
     }
 
-    /**
-     * Set the json Data attached to the message.
-     *
-     * @param array|string $data
-     * @return $this
-     *
-     * @throws CouldNotCreateMessage
-     */
-    public function setJsonData($data)
+    public function setJsonData(array|string $data): self
     {
         if (is_array($data)) {
             $data = json_encode($data);
@@ -200,25 +98,14 @@ class ExpoMessage
         return $this;
     }
 
-    /**
-     *  Set the priority of the notification, must be one of [default, normal, high].
-     *
-     * @param string $priority
-     * @return $this
-     */
-    public function priority(string $priority)
+    public function priority(string $priority): self
     {
         $this->priority = $priority;
 
         return $this;
     }
 
-    /**
-     * Get an array representation of the message.
-     *
-     * @return array
-     */
-    public function toArray()
+    public function toArray(): array
     {
         $message = [
             'title' => $this->title,
@@ -234,7 +121,7 @@ class ExpoMessage
             $message['channelId'] = $this->channelId;
         }
 
-        if(!empty($this->interruptionLevel)){
+        if (!empty($this->interruptionLevel)) {
             $message['interruptionLevel'] = $this->interruptionLevel->value;
         }
 

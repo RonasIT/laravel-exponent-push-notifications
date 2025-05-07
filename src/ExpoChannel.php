@@ -7,42 +7,16 @@ use ExponentPhpSDK\Expo;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Notifications\Events\NotificationFailed;
 use Illuminate\Notifications\Notification;
-use NotificationChannels\ExpoPushNotifications\Exceptions\CouldNotSendNotification;
 
 class ExpoChannel
 {
-    /**
-     * @var Dispatcher
-     */
-    private $events;
-
-    /**
-     * @var Expo
-     */
-    public $expo;
-
-    /**
-     * ExpoChannel constructor.
-     *
-     * @param  Expo  $expo
-     * @param  Dispatcher  $events
-     */
-    public function __construct(Expo $expo, Dispatcher $events)
-    {
-        $this->events = $events;
-        $this->expo = $expo;
+    public function __construct(
+        public Expo $expo,
+        private Dispatcher $events,
+    ) {
     }
 
-    /**
-     * Send the given notification.
-     *
-     * @param  mixed  $notifiable
-     * @param  \Illuminate\Notifications\Notification  $notification
-     * @return void
-     *
-     * @throws CouldNotSendNotification
-     */
-    public function send($notifiable, Notification $notification)
+    public function send(mixed $notifiable, Notification $notification): void
     {
         $interest = $notifiable->routeNotificationFor('ExpoPushNotifications')
             ?: $this->interestName($notifiable);
@@ -62,13 +36,7 @@ class ExpoChannel
         }
     }
 
-    /**
-     * Get the interest name for the notifiable.
-     *
-     * @param $notifiable
-     * @return string
-     */
-    public function interestName($notifiable)
+    public function interestName($notifiable): string
     {
         $class = str_replace('\\', '.', get_class($notifiable));
 
