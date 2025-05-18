@@ -3,6 +3,7 @@
 namespace NotificationChannels\ExpoPushNotifications;
 
 use NotificationChannels\ExpoPushNotifications\Enums\InterruptionLevelEnum;
+use NotificationChannels\ExpoPushNotifications\Enums\PriorityEnum;
 use NotificationChannels\ExpoPushNotifications\Exceptions\CouldNotCreateMessage;
 
 class ExpoMessage
@@ -20,7 +21,7 @@ class ExpoMessage
         protected int $ttl = 0,
         protected string $channelId = '',
         protected string $jsonData = '{}',
-        protected string $priority = 'default',
+        protected PriorityEnum $priority = PriorityEnum::Default,
         protected ?InterruptionLevelEnum $interruptionLevel = null,
     ) {
     }
@@ -98,7 +99,7 @@ class ExpoMessage
         return $this;
     }
 
-    public function priority(string $priority): self
+    public function priority(PriorityEnum $priority): self
     {
         $this->priority = $priority;
 
