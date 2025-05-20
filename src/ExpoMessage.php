@@ -115,7 +115,7 @@ class ExpoMessage
             'badge' => $this->badge,
             'ttl' => $this->ttl,
             'data' => $this->jsonData,
-            'priority' => $this->priority,
+            'priority' => $this->priority->value,
         ];
 
         if (!empty($this->channelId)) {
