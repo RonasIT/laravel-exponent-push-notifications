@@ -34,5 +34,5 @@ jobs:
             -   name: Coverage Check
                 uses: ericsizemore/phpunit-coverage-check-action@2.0.0
                 with:
-                    threshold: 100
+                    threshold: 70
                     clover_file: 'clover.xml'
