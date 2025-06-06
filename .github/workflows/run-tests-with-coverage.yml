@@ -39,7 +39,5 @@ jobs:
                     threshold: 70
                     clover_file: 'build/logs/clover.xml'
 
-            -   name: Super-linter
-                uses: super-linter/super-linter@v7.4.0
-                env:
-                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            -   name: Spell Check
+                uses: crate-ci/typos@v1.33.1
