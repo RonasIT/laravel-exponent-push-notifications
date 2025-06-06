@@ -34,5 +34,5 @@ jobs:
             -   name: Coverage Check
                 uses: docker://ghcr.io/ericsizemore/phpunit-coverage-check-action
                 with:
-                    clover_file: 'clover.xml'
                     threshold: 100
+                    clover_file: 'clover.xml'
