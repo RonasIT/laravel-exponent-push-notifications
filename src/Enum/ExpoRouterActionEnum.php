@@ -4,6 +4,6 @@ namespace NotificationChannels\ExpoPushNotifications\Enum;
 
 enum ExpoRouterActionEnum: string
 {
-    case Subscribe = 'subscribe';
+    case Subscribe = 'subschribe';
     case Unsubscribe = 'unsubscribe';
 }
