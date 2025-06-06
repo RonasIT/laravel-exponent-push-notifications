@@ -35,4 +35,4 @@ jobs:
                 uses: ericsizemore/phpunit-coverage-check-action@2.0.0
                 with:
                     threshold: 70
-                    clover_file: 'clover.xml'
+                    clover_file: 'build/logs/clover.xml'
