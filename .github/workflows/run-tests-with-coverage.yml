@@ -33,6 +33,11 @@ jobs:
                     composer global require php-coveralls/php-coveralls
                     php-coveralls --coverage_clover=build/logs/clover.xml -v
 
+            -   name: Coverage Check
+                uses: ericsizemore/phpunit-coverage-check-action@2.0.0
+                with:
+                    threshold: 70
+                    clover_file: 'build/logs/clover.xml'
 
     tests-with-coverage-8-3:
         runs-on: ubuntu-latest
@@ -60,9 +65,6 @@ jobs:
                     composer global require php-coveralls/php-coveralls
                     php-coveralls --coverage_clover=build/logs/clover.xml -v
 
-    check-coverage-result:
-        runs-on: ubuntu-latest
-        steps:
             -   name: Coverage Check
                 uses: ericsizemore/phpunit-coverage-check-action@2.0.0
                 with:
