@@ -42,14 +42,6 @@
             "providers": [
                 "NotificationChannels\\ExpoPushNotifications\\ExpoPushNotificationsServiceProvider"
             ]
-        },
-        "hooks": {
-            "config": {
-                "stop-on-failure": ["pre-commit"]
-            },
-            "pre-commit": [
-                "docker-compose up -d php && docker-compose exec -T php vendor/bin/php-cs-fixer fix && docker-compose exec -T php vendor/bin/tlint"
-            ]
         }
     }
 }
