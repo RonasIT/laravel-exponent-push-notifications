@@ -71,6 +71,8 @@ class ChannelTest extends TestCase
         $this->expo->shouldReceive('notify')->with(['interest_name'], $data, true)->andReturn([['status' => 'ok']]);
 
         $this->channel->send($this->notifiable, $this->notification);
+
+        $this->assertTrue(true);
     }
 
     /** @test */
@@ -85,6 +87,8 @@ class ChannelTest extends TestCase
         $this->events->shouldReceive('dispatch')->with(Mockery::type(NotificationFailed::class));
 
         $this->channel->send($this->notifiable, $this->notification);
+
+        $this->assertTrue(true);
     }
 }
 
