@@ -32,7 +32,7 @@ jobs:
                     php-coveralls --coverage_clover=build/logs/clover.xml -v
 
             -   name: Coverage Check
-                uses: docker://ghcr.io/ericsizemore/phpunit-coverage-check-action
+                uses: ericsizemore/phpunit-coverage-check-action@3.0.0
                 with:
                     threshold: 100
                     clover_file: 'clover.xml'
