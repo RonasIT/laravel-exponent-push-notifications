@@ -17,6 +17,8 @@ jobs:
                     tools: composer:v2
 
             -   uses: actions/checkout@v4
+                with:
+                    fetch-depth: 0
 
             -   name: Install Dependencies
                 run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
@@ -36,3 +38,8 @@ jobs:
                 with:
                     threshold: 70
                     clover_file: 'build/logs/clover.xml'
+
+            -   name: Super-linter
+                uses: super-linter/super-linter@v7.4.0
+                env:
+                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
