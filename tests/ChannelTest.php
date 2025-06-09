@@ -61,6 +61,7 @@ class ChannelTest extends TestCase
         Mockery::close();
     }
 
+    // TODO: remove after checking the reason of missing assert error
     /** @test */
     public function itCanSendANotification()
     {
@@ -75,6 +76,7 @@ class ChannelTest extends TestCase
         $this->assertTrue(true);
     }
 
+    // TODO: remove after checking the reason of missing assert error
     /** @test */
     public function itFiresFailureEventOnFailure()
     {
