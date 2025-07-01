@@ -6,38 +6,22 @@ use ExponentPhpSDK\Exceptions\ExpoException;
 use ExponentPhpSDK\Expo;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Notifications\Events\NotificationFailed;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Notifications\Notification;
 use Mockery;
 use NotificationChannels\ExpoPushNotifications\ExpoChannel;
-use NotificationChannels\ExpoPushNotifications\ExpoMessage;
+use NotificationChannels\ExpoPushNotifications\Test\Support\Notifications\TestNotifiable;
+use NotificationChannels\ExpoPushNotifications\Test\Support\Notifications\TestNotification;
 
 class ChannelTest extends TestCase
 {
-    /**
-     * @var Expo
-     */
-    protected $expo;
+    protected Expo $expo;
 
-    /**
-     * @var Dispatcher
-     */
-    protected $events;
+    protected Dispatcher $events;
 
-    /**
-     * @var ExpoChannel
-     */
-    protected $channel;
+    protected ExpoChannel $channel;
 
-    /**
-     * @var TestNotification
-     */
-    protected $notification;
+    protected TestNotification $notification;
 
-    /**
-     * @var TestNotifiable
-     */
-    protected $notifiable;
+    protected TestNotifiable $notifiable;
 
     protected function setUp(): void
     {
@@ -54,65 +38,34 @@ class ChannelTest extends TestCase
         $this->notifiable = new TestNotifiable;
     }
 
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-
-        Mockery::close();
-    }
-
-    // TODO: remove after checking the reason of missing assert error
-    /** @test */
-    public function itCanSendANotification()
+    public function testItCanSendANotification()
     {
         $message = $this->notification->toExpoPush($this->notifiable);
 
-        $data = $message->toArray();
-
-        $this->expo->shouldReceive('notify')->with(['interest_name'], $data, true)->andReturn([['status' => 'ok']]);
+        $this
+            ->expo
+            ->shouldReceive('notify')
+            ->with(['interest_name'], $message->toArray(), true)
+            ->andReturn(['status' => 'ok']);
 
         $this->channel->send($this->notifiable, $this->notification);
-
-        $this->assertTrue(true);
     }
 
-    // TODO: remove after checking the reason of missing assert error
-    /** @test */
-    public function itFiresFailureEventOnFailure()
+    public function testItFiresFailureEventOnFailure()
     {
         $message = $this->notification->toExpoPush($this->notifiable);
 
-        $data = $message->toArray();
+        $this
+            ->expo
+            ->shouldReceive('notify')
+            ->with(['interest_name'], $message->toArray(), true)
+            ->andThrow(ExpoException::class, '');
 
-        $this->expo->shouldReceive('notify')->with(['interest_name'], $data, true)->andThrow(ExpoException::class, '');
-
-        $this->events->shouldReceive('dispatch')->with(Mockery::type(NotificationFailed::class));
+        $this
+            ->events
+            ->shouldReceive('dispatch')
+            ->with(Mockery::type(NotificationFailed::class));
 
         $this->channel->send($this->notifiable, $this->notification);
-
-        $this->assertTrue(true);
-    }
-}
-
-class TestNotifiable
-{
-    use Notifiable;
-
-    public function routeNotificationForExpoPushNotifications()
-    {
-        return 'interest_name';
-    }
-
-    public function getKey()
-    {
-        return 1;
-    }
-}
-
-class TestNotification extends Notification
-{
-    public function toExpoPush($notifiable)
-    {
-        return new ExpoMessage();
     }
 }
