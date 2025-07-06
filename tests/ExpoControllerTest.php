@@ -59,7 +59,7 @@ class ExpoControllerTest extends TestCase
      *
      * @return array
      */
-    public function availableRepositories()
+    public static function availableRepositories()
     {
         return [
             [new ExpoDatabaseDriver],

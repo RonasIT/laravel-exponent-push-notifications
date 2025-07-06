@@ -1,13 +1,9 @@
 # Exponent push notifications channel for Laravel
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/alymosul/laravel-exponent-push-notifications.svg?style=flat-square)](https://packagist.org/packages/alymosul/laravel-exponent-push-notifications)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/ronasit/laravel-exponent-push-notifications.svg?style=flat-square)](https://packagist.org/packages/ronasit/laravel-exponent-push-notifications)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
-[![Build Status](https://travis-ci.org/Alymosul/laravel-exponent-push-notifications.svg?branch=master)](https://travis-ci.org/Alymosul/laravel-exponent-push-notifications)
-[![StyleCI](https://styleci.io/repos/96645200/shield?branch=master)](https://styleci.io/repos/96645200)
-[![SensioLabsInsight](https://img.shields.io/sensiolabs/i/afe0ba9a-e35c-4759-a06f-14a081cf452c.svg?style=flat-square)](https://insight.sensiolabs.com/projects/afe0ba9a-e35c-4759-a06f-14a081cf452c)
-[![Quality Score](https://img.shields.io/scrutinizer/g/alymosul/laravel-exponent-push-notifications.svg?style=flat-square)](https://scrutinizer-ci.com/g/alymosul/laravel-exponent-push-notifications)
-[![Code Coverage](https://img.shields.io/scrutinizer/coverage/g/alymosul/laravel-exponent-push-notifications/master.svg?style=flat-square)](https://scrutinizer-ci.com/g/alymosul/laravel-exponent-push-notifications/?branch=master)
-[![Total Downloads](https://img.shields.io/packagist/dt/alymosul/laravel-exponent-push-notifications.svg?style=flat-square)](https://packagist.org/packages/alymosul/laravel-exponent-push-notifications)
+[![Coverage Status](https://coveralls.io/repos/github/RonasIT/laravel-exponent-push-notifications/badge.svg?branch=add-run-tess-wtih-coverage)](https://coveralls.io/github/RonasIT/laravel-exponent-push-notifications?branch=add-run-tess-wtih-coverage)
+[![Total Downloads](https://img.shields.io/packagist/dt/ronasit/laravel-exponent-push-notifications.svg?style=flat-square)](https://packagist.org/packages/ronasit/laravel-exponent-push-notifications)
 
 ## Contents
 
