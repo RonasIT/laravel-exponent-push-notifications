@@ -19,18 +19,28 @@ class ExpoController extends Controller
 
     public function subscribe(SubscribeRequest $request): ExpoSubscribeResource
     {
-        $this->expoChannel->expo->subscribe($this->expoChannel->interestName(Auth::user()), $request->validated('expo_token'));
+        $this->expoChannel
+            ->expo
+            ->subscribe($this
+                ->expoChannel
+                ->interestName(Auth::user()), $request->validated('expo_token')
+            );
 
         return ExpoSubscribeResource::make($request->onlyValidated());
     }
 
     public function unsubscribe(UnsubscribeRequest $request): ExpoUnsubscribeResource
     {
-        $interest = $this->expoChannel->interestName(Auth::user());
+        $interest = $this
+            ->expoChannel
+            ->interestName(Auth::user());
 
         $token = $request->get('expo_token') ?: null;
 
-        $deleted = $this->expoChannel->expo->unsubscribe($interest, $token);
+        $deleted = $this
+            ->expoChannel
+            ->expo
+            ->unsubscribe($interest, $token);
 
         return ExpoUnsubscribeResource::make($deleted);
     }
