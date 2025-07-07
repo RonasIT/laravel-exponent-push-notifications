@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/RonasIT/laravel-exponent-push-notifications/badge.svg?branch=master)](https://coveralls.io/github/RonasIT/laravel-exponent-push-notifications?branch=master)
+
 # Exponent push notifications channel for Laravel
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/ronasit/laravel-exponent-push-notifications.svg?style=flat-square)](https://packagist.org/packages/ronasit/laravel-exponent-push-notifications)
