@@ -45,12 +45,11 @@ class ChannelTest extends TestCase
         $this
             ->expo
             ->shouldReceive('notify')
+            ->once()
             ->with(['interest_name'], $message->toArray(), true)
             ->andReturn(['status' => 'ok']);
 
-        $result = $this->channel->send($this->notifiable, $this->notification);
-
-        $this->assertSame(['status' => 'ok'], $result);
+        $this->channel->send($this->notifiable, $this->notification);
     }
 
     public function testItFiresFailureEventOnFailure()
@@ -60,16 +59,16 @@ class ChannelTest extends TestCase
         $this
             ->expo
             ->shouldReceive('notify')
+            ->once()
             ->with(['interest_name'], $message->toArray(), true)
             ->andThrow(ExpoException::class, '');
 
         $this
             ->events
             ->shouldReceive('dispatch')
+            ->once()
             ->with(Mockery::type(NotificationFailed::class));
 
-        $result = $this->channel->send($this->notifiable, $this->notification);
-
-        $this->assertFalse($result);
+        $this->channel->send($this->notifiable, $this->notification);
     }
 }

@@ -16,24 +16,24 @@ class ExpoChannel
     ) {
     }
 
-    public function send(mixed $notifiable, Notification $notification): array|bool
+    public function send(mixed $notifiable, Notification $notification): void
     {
         $interest = $notifiable->routeNotificationFor('ExpoPushNotifications')
-            ?? $this->interestName($notifiable);
+            ?: $this->interestName($notifiable);
+
+        $interests = [$interest];
 
         try {
-            return $this->expo->notify(
-                [$interest],
+            $this->expo->notify(
+                $interests,
                 $notification->toExpoPush($notifiable)->toArray(),
-                config('exponent-push-notifications.debug'),
+                config('exponent-push-notifications.debug')
             );
         } catch (ExpoException $e) {
             $this->events->dispatch(
                 new NotificationFailed($notifiable, $notification, 'expo-push-notifications', $e->getMessage())
             );
         }
-
-        return false;
     }
 
     public function interestName($notifiable): string
