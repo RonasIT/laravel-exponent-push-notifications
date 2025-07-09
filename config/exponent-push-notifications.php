@@ -8,19 +8,18 @@
 
 return [
     'middleware' => [
-        //'auth:sanctum', //<- Use only this middleware if you're using Sanctum
         'auth:api',
         'bindings',
     ],
     'debug' => env('EXPONENT_PUSH_NOTIFICATION_DEBUG', true),
 
     'interests' => [
-        'driver' => env('EXPONENT_PUSH_NOTIFICATION_INTERESTS_STORAGE_DRIVER', 'file'),
+        'driver' => env('EXPONENT_PUSH_NOTIFICATION_INTERESTS_STORAGE_DRIVER', 'database'),
 
         'database' => [
             'events' => [],
 
-            'table_name' => 'exponent_push_notification_interests',
+            'table_name' => 'expo_push_tokens',
         ],
     ],
 ];
