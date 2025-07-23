@@ -2,6 +2,7 @@
 
 namespace NotificationChannels\ExpoPushNotifications\Test;
 
+use Illuminate\Support\Arr;
 use NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvider;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
@@ -81,5 +82,21 @@ abstract class TestCase extends OrchestraTestCase
     public function getDatabaseDirectory(): string
     {
         return __DIR__.'/temp';
+    }
+
+    protected function getJsonFixture(string $fixtureName): array
+    {
+        $path = $this->getFixturePath($fixtureName);
+
+        return json_decode(file_get_contents($path), true);
+    }
+
+    public function getFixturePath(string $fixtureName): string
+    {
+        $class = get_class($this);
+        $explodedClass = explode('\\', $class);
+        $className = Arr::last($explodedClass);
+
+        return __DIR__ . "/fixtures/{$className}/{$fixtureName}";
     }
 }
