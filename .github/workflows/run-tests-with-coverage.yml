@@ -9,6 +9,8 @@ on:
 jobs:
     tests-with-coverage:
         runs-on: ubuntu-latest
+        env:
+            NODE_COVERALLS_DEBUG: 1
         strategy:
             matrix:
                 php-version: [ "8.2", "8.3", "8.4" ]
@@ -29,11 +31,12 @@ jobs:
             -   name: Execute unit tests via PHPUnit with coverage
                 run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
 
+            -   name: Install Coveralls
+                run: composer require php-coveralls/php-coveralls:"^2.4.2"
+
             -   name: Upload coverage results to Coveralls
                 env:
                     COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                    COVERALLS_PARALLEL: 1
-                    NODE_COVERALLS_DEBUG: 1
-                run: |
-                    composer global require php-coveralls/php-coveralls
-                    php-coveralls --coverage_clover=build/logs/clover.xml -v
+                    COVERALLS_PARALLEL: true
+                    COVERALLS_FLAG_NAME: php-${{ matrix.php-version }}
+                run: php-coveralls --coverage_clover=build/logs/clover.xml -v
