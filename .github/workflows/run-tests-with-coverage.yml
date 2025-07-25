@@ -35,3 +35,4 @@ jobs:
                 run: |
                     composer global require php-coveralls/php-coveralls
                     php-coveralls --coverage_clover=build/logs/clover.xml -v
+                    COVERALLS_PARALLEL_REPO_TOKEN=${{ secrets.COVERALLS_PARALLEL_REPO_TOKEN }} php-coveralls --coverage_clover=build/logs/clover.xml -v
