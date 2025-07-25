@@ -29,10 +29,13 @@ jobs:
             -   name: Install Dependencies
                 run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
+            -   name: Check php-coveralls installation
+                run: vendor/bin/php-coveralls --version || echo "php-coveralls is not installed"
+
             -   name: Execute unit tests via PHPUnit with coverage
                 run: vendor/bin/phpunit --coverage-clover build/logs/clover-${{ matrix.php-version }}.xml
 
             -   name: Upload coverage results to Coveralls
                 env:
                     COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                run: php-coveralls --coverage_clover=build/logs/clover-${{ matrix.php-version }}.xml -v
+                run: vendor/bin/php-coveralls --coverage_clover=build/logs/clover-${{ matrix.php-version }}.xml -v
