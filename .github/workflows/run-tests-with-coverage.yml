@@ -32,7 +32,7 @@ jobs:
                 run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
 
             -   name: Install Coveralls
-                run: composer require php-coveralls/php-coveralls:"^2.4.2"
+                run: composer require php-coveralls/php-coveralls
 
             -   name: Upload coverage results to Coveralls
                 env:
