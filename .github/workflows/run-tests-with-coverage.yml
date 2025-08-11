@@ -30,7 +30,7 @@ jobs:
                 run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
 
             -   name: Export coverage report
-                if: ${{ matrix.php-version == fromJSON(env.PHP_VERSIONS)[fromJSON(env.PHP_VERSIONS).length - 1] }}
+                if: ${{ matrix.php-version == '8.4' }}
                 uses: actions/upload-artifact@v4
                 with:
                     name: coverage.xml
