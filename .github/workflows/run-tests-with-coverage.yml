@@ -19,6 +19,10 @@ jobs:
                     coverage: xdebug, pcov
                     tools: composer:v2
 
+            -   uses: actions/checkout@v4
+                with:
+                    fetch-depth: 0
+
             -   name: Install Dependencies
                 run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
