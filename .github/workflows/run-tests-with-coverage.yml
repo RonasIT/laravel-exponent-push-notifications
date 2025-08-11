@@ -40,15 +40,6 @@ jobs:
         needs: tests-with-coverage
         runs-on: ubuntu-latest
         steps:
-            -   uses: shivammathur/setup-php@v2
-                with:
-                    php-version: "8.4"
-                    tools: composer:v2
-
-            -   name: Install Coveralls
-                run: composer require --dev -W php-coveralls/php-coveralls:"^2.8.0"
-            -   name: Check php-coveralls installation
-                run: vendor/bin/php-coveralls --version || echo "php-coveralls is not installed"
             -   uses: actions/download-artifact@v4
                 with:
                     name: report.xml
