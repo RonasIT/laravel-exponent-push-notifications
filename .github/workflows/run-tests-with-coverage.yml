@@ -49,6 +49,11 @@ jobs:
                 with:
                     name: report.xml
                     path: artifacts
+
+            -   uses: actions/checkout@v4
+                with:
+                    fetch-depth: 0
+
             -   name: Upload coverage results to Coveralls
                 env:
                     COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
