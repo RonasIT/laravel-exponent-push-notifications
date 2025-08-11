@@ -40,20 +40,13 @@ jobs:
         needs: tests-with-coverage
         runs-on: ubuntu-latest
         steps:
-            -   uses: shivammathur/setup-php@v2
-                with:
-                    php-version: "8.4"
-                    tools: composer:v2
-
             -   uses: actions/checkout@v4
                 with:
                     fetch-depth: 0
-
             -   uses: actions/download-artifact@v4
                 with:
                     name: report.xml
                     path: artifacts
-
             -   name: Upload coverage results to Coveralls
                 env:
                     COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
