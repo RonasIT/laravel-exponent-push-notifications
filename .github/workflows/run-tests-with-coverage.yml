@@ -45,9 +45,7 @@ jobs:
             -   name: Check php-coveralls installation
                 run: vendor/bin/php-coveralls --version || echo "php-coveralls is not installed"
             -   uses: actions/download-artifact@v4
-                with:
-                    name: coverage.xml
             -   name: Upload coverage results to Coveralls
                 env:
                     COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                run: vendor/bin/php-coveralls --coverage_clover=coverage.xml -v
+                run: vendor/bin/php-coveralls --coverage_clover=$GITHUB_WORKSPACE -v
