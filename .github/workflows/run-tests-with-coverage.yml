@@ -40,6 +40,8 @@ jobs:
         needs: tests-with-coverage
         runs-on: ubuntu-latest
         steps:
+            -   name: Install Dependencies
+            -   run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
             -   name: Install Coveralls
                 run: composer require --dev -W php-coveralls/php-coveralls:"^2.8.0"
             -   name: Check php-coveralls installation
