@@ -29,6 +29,5 @@ trait ChannelMockTrait
             ->shouldReceive('dispatch')
             ->once()
             ->with(Mockery::type(NotificationFailed::class));
-
     }
 }
