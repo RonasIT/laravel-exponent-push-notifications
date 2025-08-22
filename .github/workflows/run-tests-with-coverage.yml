@@ -22,7 +22,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install Dependencies
-        run: composer update -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+        run: composer install --ignore-platform-reqs -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
       - name: Execute unit tests via PHPUnit with coverage
         run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
       - name: Export coverage report
