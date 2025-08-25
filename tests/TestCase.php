@@ -89,9 +89,7 @@ abstract class TestCase extends OrchestraTestCase
 
     public function getFixturePath(string $fixtureName): string
     {
-        $class = get_class($this);
-        $explodedClass = explode('\\', $class);
-        $className = Arr::last($explodedClass);
+        list($className) = extract_last_part(get_class($this), '\\');
 
         return getcwd() . "/tests/fixtures/{$className}/{$fixtureName}";
     }
