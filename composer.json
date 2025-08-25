@@ -24,12 +24,12 @@
     },
     "autoload": {
         "psr-4": {
-            "NotificationChannels\\ExpoPushNotifications\\": "src/"
+            "NotificationChannels\\ExpoPushNotifications\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "NotificationChannels\\ExpoPushNotifications\\Test\\": "tests/"
+            "NotificationChannels\\ExpoPushNotifications\\Test\\": "tests"
         }
     },
     "scripts": {
