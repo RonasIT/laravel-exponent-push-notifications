@@ -17,6 +17,7 @@ class ChannelTest extends TestCase
     protected TestNotifiable $notifiable;
     protected Expo $expoMock;
     protected Dispatcher $events;
+    protected ExpoChannel $expoChannel;
 
     protected function setUp(): void
     {
@@ -25,23 +26,20 @@ class ChannelTest extends TestCase
         $this->notification = new TestNotification();
         $this->expoMock = Mockery::mock(Expo::class);
         $this->events = Mockery::mock(Dispatcher::class);
+        $this->expoChannel = new ExpoChannel($this->expoMock, $this->events);
     }
 
     public function testItCanSendANotification()
     {
-        $this->notification->toExpoPush(new TestNotifiable());
-
         $this->assertNotificationSend('channel_message.json');
 
-        (new ExpoChannel($this->expoMock, $this->events))->send(new TestNotifiable(), new TestNotification());
+        $this->expoChannel->send(new TestNotifiable(), new TestNotification());
     }
 
     public function testItFiresFailureEventOnFailure()
     {
-        $this->notification->toExpoPush(new TestNotifiable());
-
         $this->assertNotificationNotSend('channel_message.json');
 
-        (new ExpoChannel($this->expoMock, $this->events))->send(new TestNotifiable(), new TestNotification());
+        $this->expoChannel->send(new TestNotifiable(), new TestNotification());
     }
 }

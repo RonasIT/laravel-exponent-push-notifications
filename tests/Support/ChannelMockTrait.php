@@ -10,7 +10,8 @@ trait ChannelMockTrait
 {
     protected function assertNotificationSend(string $expectedFixture): void
     {
-        $this->expoMock
+        $this
+            ->expoMock
             ->shouldReceive('notify')
             ->once()
             ->with(['interest_name'], $this->getJsonFixture($expectedFixture), true)
@@ -19,13 +20,15 @@ trait ChannelMockTrait
 
     protected function assertNotificationNotSend(string $expectedFixture): void
     {
-        $this->expoMock
+        $this
+            ->expoMock
             ->shouldReceive('notify')
             ->once()
             ->with(['interest_name'], $this->getJsonFixture($expectedFixture), true)
             ->andThrow(ExpoException::class);
 
-        $this->events
+        $this
+            ->events
             ->shouldReceive('dispatch')
             ->once()
             ->with(Mockery::type(NotificationFailed::class));
