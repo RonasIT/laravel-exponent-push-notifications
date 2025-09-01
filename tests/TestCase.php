@@ -2,15 +2,14 @@
 
 namespace NotificationChannels\ExpoPushNotifications\Test;
 
+use Illuminate\Support\Arr;
 use NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvider;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
+use RonasIT\Support\Traits\FixturesTrait;
 
 abstract class TestCase extends OrchestraTestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-    }
+    use FixturesTrait;
 
     /**
      * Get package providers.
@@ -86,5 +85,12 @@ abstract class TestCase extends OrchestraTestCase
     public function getDatabaseDirectory(): string
     {
         return __DIR__.'/temp';
+    }
+
+    public function getFixturePath(string $fixtureName): string
+    {
+        list($className) = extract_last_part(get_class($this), '\\');
+
+        return getcwd() . "/tests/fixtures/{$className}/{$fixtureName}";
     }
 }
