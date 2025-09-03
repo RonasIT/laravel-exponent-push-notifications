@@ -1,15 +1,16 @@
 <?php
 
-namespace NotificationChannels\ExpoPusRehNotifications\Http\Resources;
+namespace NotificationChannels\ExpoPushNotifications\Http\Resources;
 
-use NotificationChannels\ExpoPushNotifications\Http\Resources\BaseExpoResource;
+use Illuminate\Http\Resources\Json\JsonResource;
 
-class ExpoSubscribeResource extends BaseExpoResource
+class ExpoSubscribeResource extends JsonResource
 {
     public function toArray($request): array
     {
-        return array_merge(parent::toArray($request), [
+        return [
+            'status' => $this->status,
             'expo_token' => $this->expo_token,
-        ]);
+        ];
     }
 }

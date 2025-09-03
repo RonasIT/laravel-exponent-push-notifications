@@ -9,13 +9,11 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class BaseExpoRequest extends BaseRequest
 {
-    protected function failedValidation(Validator $validator): ExpoNotValidResource
+    protected function failedValidation(Validator $validator): void
     {
-        throw new UnprocessableEntityHttpException(
-            (new ExpoNotValidResource([
-                'status' => 'failed',
-                'error' => $validator->errors(),
-            ]))->response(),
-        );
+        throw new UnprocessableEntityHttpException(json_encode([
+            'status' => 'failed',
+            'error' => $validator->errors(),
+        ]));
     }
 }
