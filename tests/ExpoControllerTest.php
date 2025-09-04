@@ -15,6 +15,8 @@ use NotificationChannels\ExpoPushNotifications\ExpoChannel;
 use NotificationChannels\ExpoPushNotifications\Http\ExpoController;
 use NotificationChannels\ExpoPushNotifications\Models\Interest;
 use NotificationChannels\ExpoPushNotifications\Repositories\ExpoDatabaseDriver;
+use NotificationChannels\ExpoPushNotifications\Http\Requests\SubscribeRequest;
+use NotificationChannels\ExpoPushNotifications\Http\Requests\UnsubscribeRequest;
 
 class ExpoControllerTest extends TestCase
 {
@@ -80,7 +82,7 @@ class ExpoControllerTest extends TestCase
 
         // We will fake a request with the following data
         $data = ['expo_token' => 'ExponentPushToken[fakeToken]'];
-        $request = $this->mockRequest($data);
+        $request = $this->mockRequest($data, SubscribeRequest::class);
         $request->shouldReceive('get')->with('expo_token')->andReturn($data['expo_token']);
 
         $this->mockValidator(false);
@@ -114,7 +116,7 @@ class ExpoControllerTest extends TestCase
         [$expoController, $expoChannel] = $this->setupExpo($expoRepository);
 
         // We will fake a request with no data
-        $request = $this->mockRequest([]);
+        $request = $this->mockRequest([], SubscribeRequest::class);
 
         $this->mockValidator(true);
 
@@ -132,7 +134,7 @@ class ExpoControllerTest extends TestCase
     {
         // We will fake a request with the following data
         $data = ['expo_token' => 'ExponentPushToken[fakeToken]'];
-        $request = $this->mockRequest($data);
+        $request = $this->mockRequest($data, SubscribeRequest::class);
         $request->shouldReceive('get')->andReturn($data['expo_token']);
 
         $this->mockValidator(false);
@@ -164,7 +166,7 @@ class ExpoControllerTest extends TestCase
 
         // We will fake a request with the following data
         $data = ['expo_token' => 'ExponentPushToken[fakeToken]'];
-        $request = $this->mockRequest($data);
+        $request = $this->mockRequest($data, UnsubscribeRequest::class);
         $request->shouldReceive('get')->with('expo_token')->andReturn($data['expo_token']);
 
         $this->mockValidator(false);
@@ -200,7 +202,7 @@ class ExpoControllerTest extends TestCase
         [$expoController, $expoChannel] = $this->setupExpo($expoRepository);
 
         // We will fake a request with the following data
-        $request = $this->mockRequest([]);
+        $request = $this->mockRequest([], UnsubscribeRequest::class);
         $request->shouldReceive('get')->with('expo_token')->andReturn([]);
 
         $this->mockValidator(false);
@@ -224,7 +226,7 @@ class ExpoControllerTest extends TestCase
     /** @test */
     public function unsubscribeReturnsErrorResponseIfExceptionIsThrown()
     {
-        $request = $this->mockRequest([]);
+        $request = $this->mockRequest([], UnsubscribeRequest::class);
         $request->shouldReceive('get')->with('expo_token')->andReturn([]);
 
         $expo = \Mockery::mock(Expo::class);
@@ -243,9 +245,9 @@ class ExpoControllerTest extends TestCase
      * @param $data
      * @return \Mockery\MockInterface
      */
-    public function mockRequest($data)
+    public function mockRequest($data, string $requestClass)
     {
-        $request = \Mockery::mock(Request::class);
+        $request = \Mockery::mock($requestClass);
         $request->shouldReceive('all')->andReturn($data);
 
         return $request;
