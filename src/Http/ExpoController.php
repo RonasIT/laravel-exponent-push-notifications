@@ -24,6 +24,8 @@ class ExpoController extends Controller
 
         $this->expoChannel->expo->subscribe($interest, $data['expo_token']);
 
+        $data['status'] = 'succeeded';
+
         return ExpoSubscribeResource::make($data);
     }
 
@@ -38,6 +40,6 @@ class ExpoController extends Controller
             ->expo
             ->unsubscribe($interest, $request->validated('expo_token'));
 
-        return ExpoUnsubscribeResource::make($deleted);
+        return ExpoUnsubscribeResource::make(['deleted' => $deleted]);
     }
 }

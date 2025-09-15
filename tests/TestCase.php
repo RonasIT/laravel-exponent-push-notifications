@@ -2,7 +2,6 @@
 
 namespace NotificationChannels\ExpoPushNotifications\Test;
 
-use Illuminate\Support\Arr;
 use NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvider;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use RonasIT\Support\Traits\FixturesTrait;

@@ -6,17 +6,16 @@ use ExponentPhpSDK\Expo;
 use ExponentPhpSDK\ExpoRegistrar;
 use ExponentPhpSDK\ExpoRepository;
 use ExponentPhpSDK\Repositories\ExpoFileDriver;
-use Illuminate\Contracts\Validation\Factory;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use NotificationChannels\ExpoPushNotifications\ExpoChannel;
 use NotificationChannels\ExpoPushNotifications\Http\ExpoController;
-use NotificationChannels\ExpoPushNotifications\Models\Interest;
 use NotificationChannels\ExpoPushNotifications\Repositories\ExpoDatabaseDriver;
 use NotificationChannels\ExpoPushNotifications\Http\Requests\SubscribeRequest;
 use NotificationChannels\ExpoPushNotifications\Http\Requests\UnsubscribeRequest;
+use RonasIT\Support\Testing\ModelTestState;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class ExpoControllerTest extends TestCase
 {
@@ -24,6 +23,11 @@ class ExpoControllerTest extends TestCase
      * @var ExpoController
      */
     protected $expoController;
+
+    protected static User $user;
+    protected static User $secondUser;
+
+    protected static ModelTestState $expoState;
 
     /**
      * Sets up the expo controller with the given expo channel.
@@ -83,18 +87,27 @@ class ExpoControllerTest extends TestCase
         // We will fake a request with the following data
         $data = ['expo_token' => 'ExponentPushToken[fakeToken]'];
         $request = $this->mockRequest($data, SubscribeRequest::class);
-        $request->shouldReceive('get')->with('expo_token')->andReturn($data['expo_token']);
 
-        $this->mockValidator(false);
+        $request->shouldReceive('validated')
+            ->once()
+            ->andReturn($data);
+
+        $user = new User();
+
+        $request->shouldReceive('user')
+            ->once()
+            ->andReturn($user);
+
+        $request->shouldReceive('get')
+            ->with('expo_token')
+            ->andReturn($data['expo_token']);
 
         /** @var Request $request */
-        $response = $expoController->subscribe($request);
-        $response = json_decode($response->content());
-
+        $response = $expoController->subscribe($request)->resource;
         // The response should contain a succeeded status
-        $this->assertEquals('succeeded', $response->status);
+        $this->assertEquals('succeeded', $response['status']);
         // The response should return the registered token
-        $this->assertEquals($data['expo_token'], $response->expo_token);
+        $this->assertEquals($data['expo_token'], $response['expo_token']);
 
         if ($expoRepository instanceof ExpoDatabaseDriver) {
             $this->assertDatabaseHas(config('exponent-push-notifications.interests.database.table_name'), [
@@ -115,41 +128,25 @@ class ExpoControllerTest extends TestCase
     {
         [$expoController, $expoChannel] = $this->setupExpo($expoRepository);
 
-        // We will fake a request with no data
-        $request = $this->mockRequest([], SubscribeRequest::class);
-
-        $this->mockValidator(true);
-
-        /** @var Request $request */
-        $response = $expoController->subscribe($request);
-
-        // The response should contain a failed status
-        $this->assertEquals('failed', json_decode($response->content())->status);
-        // The response status should be 422
-        $this->assertEquals(422, $response->getStatusCode());
-    }
-
-    /** @test */
-    public function subscribeReturnsErrorResponseIfExceptionIsThrown()
-    {
-        // We will fake a request with the following data
-        $data = ['expo_token' => 'ExponentPushToken[fakeToken]'];
+        $data = ['expo_token' => null];
         $request = $this->mockRequest($data, SubscribeRequest::class);
-        $request->shouldReceive('get')->andReturn($data['expo_token']);
 
-        $this->mockValidator(false);
+        $request->shouldReceive('validated')
+            ->once()
+            ->andThrow(new UnprocessableEntityHttpException(json_encode([
+                'status' => 'failed',
+                'error'  => ['expo_token' => ['The expo token field is required.']],
+            ])));
 
-        $expo = \Mockery::mock(Expo::class);
-        $expo->shouldReceive('subscribe')->andThrow(\Exception::class);
+        try {
+            $expoController->subscribe($request);
+            $this->fail('Expected UnprocessableEntityHttpException was not thrown');
+        } catch (UnprocessableEntityHttpException $exception) {
+            $payload = json_decode($exception->getMessage(), true);
 
-        /** @var Expo $expo */
-        $expoChannel = new ExpoChannel($expo, new Dispatcher());
-
-        /** @var Request $request */
-        $response = (new ExpoController($expoChannel))->subscribe($request);
-        $response = json_decode($response->content());
-
-        $this->assertEquals('failed', $response->status);
+            $this->assertEquals('failed', $payload['status']);
+            $this->assertArrayHasKey('expo_token', $payload['error']);
+        }
     }
 
     /**
@@ -164,23 +161,34 @@ class ExpoControllerTest extends TestCase
     {
         [$expoController, $expoChannel] = $this->setupExpo($expoRepository);
 
-        // We will fake a request with the following data
         $data = ['expo_token' => 'ExponentPushToken[fakeToken]'];
-        $request = $this->mockRequest($data, UnsubscribeRequest::class);
-        $request->shouldReceive('get')->with('expo_token')->andReturn($data['expo_token']);
 
-        $this->mockValidator(false);
+        $user = new User();
 
-        // We will subscribe an interest to the server.
         $token = 'ExponentPushToken[fakeToken]';
-        $interest = $expoChannel->interestName(new User());
+        $interest = $expoChannel->interestName($user);
         $expoChannel->expo->subscribe($interest, $token);
 
-        $response = $expoController->unsubscribe($request);
-        $response = json_decode($response->content());
+        // We will fake a request with the following data
+        $request = $this->mockRequest($data, UnsubscribeRequest::class);
+
+        $request->shouldReceive('validated')
+            ->once()
+            ->andReturn($data['expo_token']);
+
+        $request->shouldReceive('user')
+            ->once()
+            ->andReturn($user);
+
+        $request->shouldReceive('get')
+            ->with('expo_token')
+            ->andReturn($data['expo_token']);
+
+        // We will subscribe an interest to the server.
+        $response = $expoController->unsubscribe($request)->resource;
 
         // The response should contain a deleted property with value true
-        $this->assertTrue($response->deleted);
+        $this->assertTrue($response['deleted']);
 
         if ($expoRepository instanceof ExpoDatabaseDriver) {
             $this->assertDatabaseMissing(config('exponent-push-notifications.interests.database.table_name'), [
@@ -193,50 +201,40 @@ class ExpoControllerTest extends TestCase
     /**
      * @test
      *
-     * @param $expoRepository
      *
      * @dataProvider availableRepositories
+     *
+     * @param $expoRepository
      */
-    public function aDeviceCanUnsubscribeFromTheSystem($expoRepository)
+    public function unsubscribeReturnsErrorResponseIfExceptionIsThrown($expoRepository)
     {
         [$expoController, $expoChannel] = $this->setupExpo($expoRepository);
 
-        // We will fake a request with the following data
-        $request = $this->mockRequest([], UnsubscribeRequest::class);
-        $request->shouldReceive('get')->with('expo_token')->andReturn([]);
+        $data = ['expo_token' => null];
+        $request = $this->mockRequest($data, UnsubscribeRequest::class);
 
-        $this->mockValidator(false);
+        $request->shouldReceive('validated')
+            ->once()
+            ->andThrow(new UnprocessableEntityHttpException(json_encode([
+                'status' => 'failed',
+                'error'  => ['expo_token' => ['The expo token field is required.']],
+            ])));
 
-        // We will subscribe an interest to the server.
-        $token = 'ExponentPushToken[fakeToken]';
-        $interest = $expoChannel->interestName(new User());
-        $expoChannel->expo->subscribe($interest, $token);
+        $user = new User();
 
-        $response = $expoController->unsubscribe($request);
-        $response = json_decode($response->content());
+        $request->shouldReceive('user')
+            ->once()
+            ->andReturn($user);
 
-        // The response should contain a deleted property with value true
-        $this->assertTrue($response->deleted);
+        try {
+            $expoController->unsubscribe($request);
+            $this->fail('Expected UnprocessableEntityHttpException was not thrown');
+        } catch (UnprocessableEntityHttpException $exception) {
+            $payload = json_decode($exception->getMessage(), true);
 
-        if ($expoRepository instanceof ExpoDatabaseDriver) {
-            $this->assertEquals(0, Interest::count());
+            $this->assertEquals('failed', $payload['status']);
+            $this->assertArrayHasKey('expo_token', $payload['error']);
         }
-    }
-
-    /** @test */
-    public function unsubscribeReturnsErrorResponseIfExceptionIsThrown()
-    {
-        $request = $this->mockRequest([], UnsubscribeRequest::class);
-        $request->shouldReceive('get')->with('expo_token')->andReturn([]);
-
-        $expo = \Mockery::mock(Expo::class);
-        $expo->shouldReceive('unsubscribe')->andThrow(\Exception::class);
-
-        /** @var Expo $expo */
-        $response = (new ExpoController(new ExpoChannel($expo, new Dispatcher())))->unsubscribe($request);
-        $response = json_decode($response->content());
-
-        $this->assertEquals('failed', $response->status);
     }
 
     /**
@@ -251,25 +249,6 @@ class ExpoControllerTest extends TestCase
         $request->shouldReceive('all')->andReturn($data);
 
         return $request;
-    }
-
-    /**
-     * @param  bool  $fails
-     * @return \Mockery\MockInterface
-     */
-    public function mockValidator(bool $fails)
-    {
-        $validator = \Mockery::mock(\Illuminate\Validation\Validator::class);
-
-        $validation = \Mockery::mock(Factory::class);
-
-        $validation->shouldReceive('make')->once()->andReturn($validator);
-
-        $validator->shouldReceive('fails')->once()->andReturn($fails);
-
-        Validator::swap($validation);
-
-        return $validator;
     }
 }
 

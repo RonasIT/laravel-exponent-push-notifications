@@ -9,8 +9,8 @@ class ExpoSubscribeResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            'status' => $this->status,
-            'expo_token' => $this->expo_token,
+            'status' => $this->resource->status,
+            'expo_token' => $this->resource->expo_token,
         ];
     }
 }
