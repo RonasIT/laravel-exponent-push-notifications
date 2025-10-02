@@ -19,7 +19,8 @@
     "require-dev": {
         "mockery/mockery": "^1.6.12",
         "phpunit/phpunit": "^11.5.5",
-        "orchestra/testbench": "^10.4"
+        "orchestra/testbench": "^10.4",
+        "ronasit/laravel-helpers": "^2.7.1"
     },
     "autoload": {
         "psr-4": {

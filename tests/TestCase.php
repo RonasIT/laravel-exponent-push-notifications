@@ -21,12 +21,7 @@ abstract class TestCase extends OrchestraTestCase
             $this->prepareSequences();
         }
     }
-    /**
-     * Get package providers.
-     *
-     * @param  \Illuminate\Foundation\Application  $app
-     * @return array
-     */
+
     protected function getPackageProviders($app)
     {
         return [
@@ -34,12 +29,6 @@ abstract class TestCase extends OrchestraTestCase
         ];
     }
 
-    /**
-     * Define environment setup.
-     *
-     * @param  \Illuminate\Foundation\Application  $app
-     * @return void
-     */
     public function getEnvironmentSetUp($app)
     {
         $this->setupDb($app);
@@ -48,11 +37,6 @@ abstract class TestCase extends OrchestraTestCase
         $app['config']->set('exponent-push-notifications.middleware', []);
     }
 
-    /**
-     * Sets up the database.
-     *
-     * @return void
-     */
     protected function setupDb($app): void
     {
         $app['config']->set('database.default', env('DB_CONNECTION', 'pgsql'));
