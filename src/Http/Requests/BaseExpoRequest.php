@@ -3,16 +3,18 @@
 namespace NotificationChannels\ExpoPushNotifications\Http\Requests;
 
 use Illuminate\Contracts\Validation\Validator;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class BaseExpoRequest extends FormRequest
 {
     protected function failedValidation(Validator $validator): void
     {
-        throw new UnprocessableEntityHttpException(json_encode([
+        $response = response()->json([
             'status' => 'failed',
-            'error' => $validator->errors(),
-        ]));
+            'errors' => $validator->errors(),
+        ], 422);
+
+        throw new ValidationException($validator, $response);
     }
 }

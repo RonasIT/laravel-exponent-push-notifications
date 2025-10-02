@@ -7,7 +7,7 @@ class UnsubscribeRequest extends BaseExpoRequest
     public function rules(): array
     {
         return [
-            'expo_token' => 'filled|string',
+            'expo_token' => 'sometimes|string',
         ];
     }
 }

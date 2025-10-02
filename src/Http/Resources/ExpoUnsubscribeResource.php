@@ -6,10 +6,12 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class ExpoUnsubscribeResource extends JsonResource
 {
+    public static $wrap = null;
+
     public function toArray($request): array
     {
         return [
-            'deleted' => $this->resource->deleted,
+            'deleted' => $this->resource['deleted'],
         ];
     }
 }

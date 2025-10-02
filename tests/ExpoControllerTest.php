@@ -2,62 +2,43 @@
 
 namespace NotificationChannels\ExpoPushNotifications\Test;
 
+use ExponentPhpSDK\Repositories\ExpoFileDriver;
+use NotificationChannels\ExpoPushNotifications\Repositories\ExpoDatabaseDriver;
+use NotificationChannels\ExpoPushNotifications\Test\database\Models\User;
+use ExponentPhpSDK\ExpoRepository;
+use NotificationChannels\ExpoPushNotifications\ExpoChannel;
 use ExponentPhpSDK\Expo;
 use ExponentPhpSDK\ExpoRegistrar;
-use ExponentPhpSDK\ExpoRepository;
-use ExponentPhpSDK\Repositories\ExpoFileDriver;
-use Illuminate\Events\Dispatcher;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use NotificationChannels\ExpoPushNotifications\ExpoChannel;
-use NotificationChannels\ExpoPushNotifications\Http\ExpoController;
-use NotificationChannels\ExpoPushNotifications\Repositories\ExpoDatabaseDriver;
-use NotificationChannels\ExpoPushNotifications\Http\Requests\SubscribeRequest;
-use NotificationChannels\ExpoPushNotifications\Http\Requests\UnsubscribeRequest;
-use RonasIT\Support\Testing\ModelTestState;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use NotificationChannels\ExpoPushNotifications\Models\Interest;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ExpoControllerTest extends TestCase
 {
-    /**
-     * @var ExpoController
-     */
-    protected $expoController;
+    use RefreshDatabase;
 
     protected static User $user;
-    protected static User $secondUser;
-
-    protected static ModelTestState $expoState;
-
-    /**
-     * Sets up the expo controller with the given expo channel.
-     *
-     * @param  ExpoRepository  $expoRepository
-     * @return array
-     */
-    protected function setupExpo(ExpoRepository $expoRepository)
-    {
-        $expoChannel = new ExpoChannel(new Expo(new ExpoRegistrar($expoRepository)), new Dispatcher);
-        $expoController = new ExpoController($expoChannel);
-
-        return [$expoController, $expoChannel];
-    }
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->setUpDatabase();
+        self::$user = User::create([
+            'email' => 'test@email.ru',
+        ]);
 
-        // We will fake an authenticated user
-        Auth::shouldReceive('user')->andReturn(new User());
+        $this->bindExpoRepository();
     }
 
-    protected function tearDown(): void
+    protected function bindExpoRepository(): void
     {
-        \Mockery::close();
+        $expoRepository = new ExpoDatabaseDriver();
 
-        parent::tearDown();
+        $this->app->bind(ExpoRepository::class, fn () => $expoRepository);
+
+        $this->app->bind(ExpoChannel::class, fn ($app) => new ExpoChannel(
+            expo: new Expo(new ExpoRegistrar($expoRepository)),
+            events: $app['events']
+        ));
     }
 
     /**
@@ -80,38 +61,22 @@ class ExpoControllerTest extends TestCase
      *
      * @dataProvider availableRepositories
      */
+
     public function aDeviceCanSubscribeToTheSystem($expoRepository)
     {
-        [$expoController, $expoChannel] = $this->setupExpo($expoRepository);
-
-        // We will fake a request with the following data
         $data = ['expo_token' => 'ExponentPushToken[fakeToken]'];
-        $request = $this->mockRequest($data, SubscribeRequest::class);
 
-        $request->shouldReceive('validated')
-            ->once()
-            ->andReturn($data);
+        $response = $this->actingAs(self::$user)->json('POST', 'exponent/devices/subscribe', $data);
 
-        $user = new User();
+        $response->assertOk();
 
-        $request->shouldReceive('user')
-            ->once()
-            ->andReturn($user);
-
-        $request->shouldReceive('get')
-            ->with('expo_token')
-            ->andReturn($data['expo_token']);
-
-        /** @var Request $request */
-        $response = $expoController->subscribe($request)->resource;
-        // The response should contain a succeeded status
         $this->assertEquals('succeeded', $response['status']);
-        // The response should return the registered token
+
         $this->assertEquals($data['expo_token'], $response['expo_token']);
 
         if ($expoRepository instanceof ExpoDatabaseDriver) {
-            $this->assertDatabaseHas(config('exponent-push-notifications.interests.database.table_name'), [
-                'key' => 'NotificationChannels.ExpoPushNotifications.Test.User.'.(new User)->getKey(),
+            $this->assertDatabaseHas('exponent_push_notification_interests', [
+                'key' => 'NotificationChannels.ExpoPushNotifications.Test.database.Models.User.1',
                 'value' => $data['expo_token'],
             ]);
         }
@@ -124,34 +89,33 @@ class ExpoControllerTest extends TestCase
      *
      * @dataProvider availableRepositories
      */
+
     public function subscribeReturnsErrorResponseIfTokenInvalid($expoRepository)
     {
-        [$expoController, $expoChannel] = $this->setupExpo($expoRepository);
-
         $data = ['expo_token' => null];
-        $request = $this->mockRequest($data, SubscribeRequest::class);
 
-        $request->shouldReceive('validated')
-            ->once()
-            ->andThrow(new UnprocessableEntityHttpException(json_encode([
-                'status' => 'failed',
-                'error'  => ['expo_token' => ['The expo token field is required.']],
-            ])));
+        $response = $this->actingAs(self::$user)->json('POST', 'exponent/devices/subscribe', $data);
 
-        try {
-            $expoController->subscribe($request);
-            $this->fail('Expected UnprocessableEntityHttpException was not thrown');
-        } catch (UnprocessableEntityHttpException $exception) {
-            $payload = json_decode($exception->getMessage(), true);
+        $response->assertUnprocessable();
 
-            $this->assertEquals('failed', $payload['status']);
-            $this->assertArrayHasKey('expo_token', $payload['error']);
+        $response->assertJson([
+            'status' => 'failed',
+            'errors' => [
+                'expo_token' => [
+                    'The expo token field is required.',
+                ],
+            ],
+        ]);
+
+        if ($expoRepository instanceof ExpoDatabaseDriver) {
+            $this->assertDatabaseMissing('exponent_push_notification_interests', [
+                'key' => 'NotificationChannels.ExpoPushNotifications.Test.database.Models.User.1',
+            ]);
         }
     }
 
     /**
      * @test
-     *
      *
      * @dataProvider availableRepositories
      *
@@ -159,40 +123,22 @@ class ExpoControllerTest extends TestCase
      */
     public function aDeviceCanUnsubscribeSingleTokenFromTheSystem($expoRepository)
     {
-        [$expoController, $expoChannel] = $this->setupExpo($expoRepository);
+        Interest::create([
+            'key' => 'NotificationChannels.ExpoPushNotifications.Test.database.Models.User.1',
+            'value' => 'ExponentPushToken[1]',
+        ]);
 
-        $data = ['expo_token' => 'ExponentPushToken[fakeToken]'];
+        $data = ['expo_token' => 'ExponentPushToken[1]'];
 
-        $user = new User();
+        $response = $this->actingAs(self::$user)->json('POST', 'exponent/devices/unsubscribe', $data);
 
-        $token = 'ExponentPushToken[fakeToken]';
-        $interest = $expoChannel->interestName($user);
-        $expoChannel->expo->subscribe($interest, $token);
+        $response->assertOk();
 
-        // We will fake a request with the following data
-        $request = $this->mockRequest($data, UnsubscribeRequest::class);
-
-        $request->shouldReceive('validated')
-            ->once()
-            ->andReturn($data['expo_token']);
-
-        $request->shouldReceive('user')
-            ->once()
-            ->andReturn($user);
-
-        $request->shouldReceive('get')
-            ->with('expo_token')
-            ->andReturn($data['expo_token']);
-
-        // We will subscribe an interest to the server.
-        $response = $expoController->unsubscribe($request)->resource;
-
-        // The response should contain a deleted property with value true
         $this->assertTrue($response['deleted']);
 
         if ($expoRepository instanceof ExpoDatabaseDriver) {
             $this->assertDatabaseMissing(config('exponent-push-notifications.interests.database.table_name'), [
-                'key' => 'NotificationChannels.ExpoPushNotifications.Test.User.'.(new User)->getKey(),
+                'key' => 'NotificationChannels.ExpoPushNotifications.Test.database.Models.User.2',
                 'value' => $data['expo_token'],
             ]);
         }
@@ -201,61 +147,36 @@ class ExpoControllerTest extends TestCase
     /**
      * @test
      *
-     *
      * @dataProvider availableRepositories
      *
      * @param $expoRepository
      */
     public function unsubscribeReturnsErrorResponseIfExceptionIsThrown($expoRepository)
     {
-        [$expoController, $expoChannel] = $this->setupExpo($expoRepository);
+        Interest::create([
+            'key' => 'NotificationChannels.ExpoPushNotifications.Test.database.Models.User.1',
+            'value' => 'ExponentPushToken[1]',
+        ]);
 
         $data = ['expo_token' => null];
-        $request = $this->mockRequest($data, UnsubscribeRequest::class);
 
-        $request->shouldReceive('validated')
-            ->once()
-            ->andThrow(new UnprocessableEntityHttpException(json_encode([
-                'status' => 'failed',
-                'error'  => ['expo_token' => ['The expo token field is required.']],
-            ])));
+        $response = $this->actingAs(self::$user)->json('POST', 'exponent/devices/unsubscribe', $data);
 
-        $user = new User();
+        $response->assertUnprocessable();
 
-        $request->shouldReceive('user')
-            ->once()
-            ->andReturn($user);
+        $response->assertJson([
+            'status' => 'failed',
+            'errors' => [
+                'expo_token' => [
+                    'The expo token field must be a string.',
+                ],
+            ],
+        ]);
 
-        try {
-            $expoController->unsubscribe($request);
-            $this->fail('Expected UnprocessableEntityHttpException was not thrown');
-        } catch (UnprocessableEntityHttpException $exception) {
-            $payload = json_decode($exception->getMessage(), true);
-
-            $this->assertEquals('failed', $payload['status']);
-            $this->assertArrayHasKey('expo_token', $payload['error']);
+        if ($expoRepository instanceof ExpoDatabaseDriver) {
+            $this->assertDatabaseHas('exponent_push_notification_interests', [
+                'key' => 'NotificationChannels.ExpoPushNotifications.Test.database.Models.User.1',
+            ]);
         }
-    }
-
-    /**
-     * Mocks a request for the ExpoController.
-     *
-     * @param $data
-     * @return \Mockery\MockInterface
-     */
-    public function mockRequest($data, string $requestClass)
-    {
-        $request = \Mockery::mock($requestClass);
-        $request->shouldReceive('all')->andReturn($data);
-
-        return $request;
-    }
-}
-
-class User
-{
-    public function getKey()
-    {
-        return 1;
     }
 }
