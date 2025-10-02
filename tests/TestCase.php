@@ -6,6 +6,7 @@ use NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvi
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use RonasIT\Support\Traits\FixturesTrait;
 use NotificationChannels\ExpoPushNotifications\Test\database\Models\User;
+use Dotenv\Dotenv;
 
 abstract class TestCase extends OrchestraTestCase
 {
@@ -42,6 +43,8 @@ abstract class TestCase extends OrchestraTestCase
      */
     public function getEnvironmentSetUp($app)
     {
+        Dotenv::createImmutable(__DIR__ . '/..', '.env.testing')->load();
+
         $this->setupDb($app);
 
         $app['config']->set('auth.providers.users.model', User::class);
