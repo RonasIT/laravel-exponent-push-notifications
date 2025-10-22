@@ -11,20 +11,25 @@ use ExponentPhpSDK\Expo;
 use ExponentPhpSDK\ExpoRegistrar;
 use NotificationChannels\ExpoPushNotifications\Models\Interest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use NotificationChannels\ExpoPushNotifications\Test\Support\ModelTestState;
 
 class ExpoControllerTest extends TestCase
 {
     use RefreshDatabase;
 
     protected static User $user;
+    protected static User $secondUser;
+
+    protected static ModelTestState $interestTestState;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        self::$user = User::create([
-            'email' => 'test@email.ru',
-        ]);
+        self::$user ??= User::find(1);
+        self::$secondUser ??= User::find(2);
+
+        self::$interestTestState ??= new ModelTestState(Interest::class);
 
         $this->bindExpoRepository();
     }
@@ -62,7 +67,7 @@ class ExpoControllerTest extends TestCase
      * @dataProvider availableRepositories
      */
 
-    public function aDeviceCanSubscribeToTheSystem($expoRepository)
+    public function testSubscribe($expoRepository): void
     {
         $data = ['expo_token' => 'ExponentPushToken[fakeToken]'];
 
@@ -70,15 +75,10 @@ class ExpoControllerTest extends TestCase
 
         $response->assertOk();
 
-        $this->assertEquals('succeeded', $response['status']);
-
-        $this->assertEquals($data['expo_token'], $response['expo_token']);
+        $this->assertEqualsFixture('subscribe', $response->json());
 
         if ($expoRepository instanceof ExpoDatabaseDriver) {
-            $this->assertDatabaseHas('exponent_push_notification_interests', [
-                'key' => 'NotificationChannels.ExpoPushNotifications.Test.database.Models.User.1',
-                'value' => $data['expo_token'],
-            ]);
+            self::$interestTestState->assertChangesEqualsFixture('subscribe');
         }
     }
 
@@ -108,9 +108,7 @@ class ExpoControllerTest extends TestCase
         ]);
 
         if ($expoRepository instanceof ExpoDatabaseDriver) {
-            $this->assertDatabaseMissing('exponent_push_notification_interests', [
-                'key' => 'NotificationChannels.ExpoPushNotifications.Test.database.Models.User.1',
-            ]);
+            self::$interestTestState->assertNotChanged();
         }
     }
 
@@ -123,24 +121,16 @@ class ExpoControllerTest extends TestCase
      */
     public function aDeviceCanUnsubscribeSingleTokenFromTheSystem($expoRepository)
     {
-        Interest::create([
-            'key' => 'NotificationChannels.ExpoPushNotifications.Test.database.Models.User.1',
-            'value' => 'ExponentPushToken[1]',
-        ]);
+        $data = ['expo_token' => 'ExponentPushToken[2]'];
 
-        $data = ['expo_token' => 'ExponentPushToken[1]'];
-
-        $response = $this->actingAs(self::$user)->json('POST', 'exponent/devices/unsubscribe', $data);
+        $response = $this->actingAs(self::$secondUser)->json('POST', 'exponent/devices/unsubscribe', $data);
 
         $response->assertOk();
 
         $this->assertTrue($response['deleted']);
 
         if ($expoRepository instanceof ExpoDatabaseDriver) {
-            $this->assertDatabaseMissing(config('exponent-push-notifications.interests.database.table_name'), [
-                'key' => 'NotificationChannels.ExpoPushNotifications.Test.database.Models.User.2',
-                'value' => $data['expo_token'],
-            ]);
+            self::$interestTestState->assertChangesEqualsFixture('unsubscribe');
         }
     }
 
@@ -153,14 +143,9 @@ class ExpoControllerTest extends TestCase
      */
     public function unsubscribeReturnsErrorResponseIfExceptionIsThrown($expoRepository)
     {
-        Interest::create([
-            'key' => 'NotificationChannels.ExpoPushNotifications.Test.database.Models.User.1',
-            'value' => 'ExponentPushToken[1]',
-        ]);
-
         $data = ['expo_token' => null];
 
-        $response = $this->actingAs(self::$user)->json('POST', 'exponent/devices/unsubscribe', $data);
+        $response = $this->actingAs(self::$secondUser)->json('POST', 'exponent/devices/unsubscribe', $data);
 
         $response->assertUnprocessable();
 
@@ -174,9 +159,7 @@ class ExpoControllerTest extends TestCase
         ]);
 
         if ($expoRepository instanceof ExpoDatabaseDriver) {
-            $this->assertDatabaseHas('exponent_push_notification_interests', [
-                'key' => 'NotificationChannels.ExpoPushNotifications.Test.database.Models.User.1',
-            ]);
+            self::$interestTestState->assertNotChanged();
         }
     }
 }

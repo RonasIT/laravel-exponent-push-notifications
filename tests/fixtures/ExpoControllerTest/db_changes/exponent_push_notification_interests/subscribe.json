@@ -1,0 +1,11 @@
+{
+    "updated": [],
+    "created": [
+        {
+            "id": 2,
+            "key": "NotificationChannels.ExpoPushNotifications.Test.database.Models.User.1",
+            "value": "ExponentPushToken[fakeToken]"
+        }
+    ],
+    "deleted": []
+}

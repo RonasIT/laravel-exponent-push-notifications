@@ -10,6 +10,8 @@ use RonasIT\Support\Traits\ModelTrait;
 
 class User extends Authenticatable
 {
+    protected $table = 'users';
+
     use Notifiable;
     use ModelTrait;
     use HasFactory;
