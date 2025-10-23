@@ -10,13 +10,10 @@ use NotificationChannels\ExpoPushNotifications\ExpoChannel;
 use ExponentPhpSDK\Expo;
 use ExponentPhpSDK\ExpoRegistrar;
 use NotificationChannels\ExpoPushNotifications\Models\Interest;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use NotificationChannels\ExpoPushNotifications\Test\Support\ModelTestState;
 
 class ExpoControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     protected static User $user;
     protected static User $secondUser;
 
