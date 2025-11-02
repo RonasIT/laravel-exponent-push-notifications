@@ -20,9 +20,14 @@ class ExpoController extends Controller
     {
         $data = $request->validated();
 
-        $interest = $this->expoChannel->interestName($request->user());
+        $interest = $this
+            ->expoChannel
+            ->interestName($request->user());
 
-        $this->expoChannel->expo->subscribe($interest, $data['expo_token']);
+        $this
+            ->expoChannel
+            ->expo
+            ->subscribe($interest, $data['expo_token']);
 
         $data['status'] = 'succeeded';
 
