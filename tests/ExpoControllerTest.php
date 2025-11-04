@@ -29,11 +29,6 @@ class ExpoControllerTest extends TestCase
         $this->bindExpoRepository();
     }
 
-    /**
-     * Data provider to help test the expo controller with the different repositories.
-     *
-     * @return array
-     */
     public static function getExpoDriver(): array
     {
         return [
@@ -82,7 +77,7 @@ class ExpoControllerTest extends TestCase
     public function testUnsubscribe(ExpoRepository $driver): void
     {
         $response = $this->actingAs(self::$secondUser)->json('POST', 'exponent/devices/unsubscribe', [
-            'expo_token' => 'ExponentPushToken[2]'
+            'expo_token' => 'ExponentPushToken[2]',
         ]);
 
         $response->assertOk();
