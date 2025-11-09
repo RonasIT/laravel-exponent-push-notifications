@@ -5,9 +5,8 @@ namespace NotificationChannels\ExpoPushNotifications\Http;
 use Illuminate\Routing\Controller;
 use NotificationChannels\ExpoPushNotifications\ExpoChannel;
 use NotificationChannels\ExpoPushNotifications\Http\Requests\SubscribeRequest;
-use NotificationChannels\ExpoPushNotifications\Http\Resources\ExpoSubscribeResource;
 use NotificationChannels\ExpoPushNotifications\Http\Requests\UnsubscribeRequest;
-use NotificationChannels\ExpoPushNotifications\Http\Resources\ExpoUnsubscribeResource;
+use Illuminate\Http\Response;
 
 class ExpoController extends Controller
 {
@@ -16,10 +15,8 @@ class ExpoController extends Controller
     ) {
     }
 
-    public function subscribe(SubscribeRequest $request): ExpoSubscribeResource
+    public function subscribe(SubscribeRequest $request): Response
     {
-        $data = $request->validated();
-
         $interest = $this
             ->expoChannel
             ->interestName($request->user());
@@ -27,24 +24,22 @@ class ExpoController extends Controller
         $this
             ->expoChannel
             ->expo
-            ->subscribe($interest, $data['expo_token']);
+            ->subscribe($interest, $request->validated('expo_token'));
 
-        $data['status'] = 'succeeded';
-
-        return ExpoSubscribeResource::make($data);
+        return response()->noContent();
     }
 
-    public function unsubscribe(UnsubscribeRequest $request): ExpoUnsubscribeResource
+    public function unsubscribe(UnsubscribeRequest $request): Response
     {
         $interest = $this
             ->expoChannel
             ->interestName($request->user());
 
-        $deleted = $this
+        $this
             ->expoChannel
             ->expo
             ->unsubscribe($interest, $request->validated('expo_token'));
 
-        return ExpoUnsubscribeResource::make(['deleted' => $deleted]);
+        return response()->noContent();
     }
 }

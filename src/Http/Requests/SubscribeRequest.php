@@ -2,7 +2,9 @@
 
 namespace NotificationChannels\ExpoPushNotifications\Http\Requests;
 
-class SubscribeRequest extends BaseExpoRequest
+use RonasIT\Support\Http\BaseRequest;
+
+class SubscribeRequest extends BaseRequest
 {
     public function rules(): array
     {

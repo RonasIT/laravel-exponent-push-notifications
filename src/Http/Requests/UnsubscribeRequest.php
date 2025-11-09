@@ -2,7 +2,9 @@
 
 namespace NotificationChannels\ExpoPushNotifications\Http\Requests;
 
-class UnsubscribeRequest extends BaseExpoRequest
+use RonasIT\Support\Http\BaseRequest;
+
+class UnsubscribeRequest extends BaseRequest
 {
     public function rules(): array
     {

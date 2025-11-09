@@ -25,28 +25,26 @@ class ExpoControllerTest extends TestCase
         self::$secondUser ??= User::find(2);
 
         self::$interestTestState ??= new ModelTestState(Interest::class);
-
-        $this->bindExpoRepository();
     }
 
     public static function getExpoDriver(): array
     {
         return [
-            [new ExpoDatabaseDriver],
-            [new ExpoFileDriver],
+            ['driver' => new ExpoDatabaseDriver()],
+            ['driver' => new ExpoFileDriver()],
         ];
     }
 
     #[DataProvider('getExpoDriver')]
     public function testSubscribe(ExpoRepository $driver): void
     {
-        $response = $this->actingAs(self::$user)->json('POST', 'exponent/devices/subscribe', [
+        $this->bindExpoRepository($driver);
+
+        $response = $this->actingAs(self::$user)->json('post', 'exponent/devices/subscribe', [
             'expo_token' => 'ExponentPushToken[fakeToken]',
         ]);
 
-        $response->assertOk();
-
-        $this->assertEqualsFixture('subscribe', $response->json());
+        $response->assertNoContent();
 
         if ($driver instanceof ExpoDatabaseDriver) {
             self::$interestTestState->assertChangesEqualsFixture('subscribe');
@@ -55,20 +53,13 @@ class ExpoControllerTest extends TestCase
 
     public function testSubscribeInvalidToken(): void
     {
-        $response = $this->actingAs(self::$user)->json('POST', 'exponent/devices/subscribe', [
+        $response = $this->actingAs(self::$user)->json('post', 'exponent/devices/subscribe', [
             'expo_token' => null,
         ]);
 
         $response->assertUnprocessable();
 
-        $response->assertJson([
-            'status' => 'failed',
-            'errors' => [
-                'expo_token' => [
-                    'The expo token field is required.',
-                ],
-            ],
-        ]);
+        $response->assertJson(['message' => 'The expo token field is required.']);
 
         self::$interestTestState->assertNotChanged();
     }
@@ -76,13 +67,13 @@ class ExpoControllerTest extends TestCase
     #[DataProvider('getExpoDriver')]
     public function testUnsubscribe(ExpoRepository $driver): void
     {
-        $response = $this->actingAs(self::$secondUser)->json('POST', 'exponent/devices/unsubscribe', [
+        $this->bindExpoRepository($driver);
+
+        $response = $this->actingAs(self::$secondUser)->json('post', 'exponent/devices/unsubscribe', [
             'expo_token' => 'ExponentPushToken[2]',
         ]);
 
-        $response->assertOk();
-
-        $this->assertTrue($response['deleted']);
+        $response->assertNoContent();
 
         if ($driver instanceof ExpoDatabaseDriver) {
             self::$interestTestState->assertChangesEqualsFixture('unsubscribe');
@@ -91,20 +82,13 @@ class ExpoControllerTest extends TestCase
 
     public function testUnsubscribeInvalidToken(): void
     {
-        $response = $this->actingAs(self::$secondUser)->json('POST', 'exponent/devices/unsubscribe', [
+        $response = $this->actingAs(self::$secondUser)->json('post', 'exponent/devices/unsubscribe', [
             'expo_token' => null,
         ]);
 
         $response->assertUnprocessable();
 
-        $response->assertJson([
-            'status' => 'failed',
-            'errors' => [
-                'expo_token' => [
-                    'The expo token field must be a string.',
-                ],
-            ],
-        ]);
+        $response->assertJson(['message' => 'The expo token field must be a string.']);
 
         self::$interestTestState->assertNotChanged();
     }

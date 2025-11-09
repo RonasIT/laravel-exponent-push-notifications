@@ -6,7 +6,6 @@ use NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvi
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use RonasIT\Support\Traits\FixturesTrait;
 use NotificationChannels\ExpoPushNotifications\Test\database\Models\User;
-use NotificationChannels\ExpoPushNotifications\Repositories\ExpoDatabaseDriver;
 use ExponentPhpSDK\ExpoRepository;
 use NotificationChannels\ExpoPushNotifications\ExpoChannel;
 use ExponentPhpSDK\Expo;
@@ -62,14 +61,12 @@ abstract class TestCase extends OrchestraTestCase
         return getcwd() . "/tests/fixtures/{$className}/{$fixtureName}";
     }
 
-    protected function bindExpoRepository(): void
+    protected function bindExpoRepository(ExpoRepository $driver): void
     {
-        $dbDriver = new ExpoDatabaseDriver();
-
-        $this->app->bind(ExpoRepository::class, fn () => $dbDriver);
+        $this->app->bind(ExpoRepository::class, fn () => $driver);
 
         $this->app->bind(ExpoChannel::class, fn ($app) => new ExpoChannel(
-            expo: new Expo(new ExpoRegistrar($dbDriver)),
+            expo: new Expo(new ExpoRegistrar($driver)),
             events: $app['events']
         ));
     }
