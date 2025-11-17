@@ -2,12 +2,11 @@
 
 namespace NotificationChannels\ExpoPushNotifications\Http;
 
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use NotificationChannels\ExpoPushNotifications\ExpoChannel;
+use NotificationChannels\ExpoPushNotifications\Http\Requests\SubscribeRequest;
+use NotificationChannels\ExpoPushNotifications\Http\Requests\UnsubscribeRequest;
+use Illuminate\Http\Response;
 
 class ExpoController extends Controller
 {
@@ -16,72 +15,31 @@ class ExpoController extends Controller
     ) {
     }
 
-    public function subscribe(Request $request): JsonResponse
+    public function subscribe(SubscribeRequest $request): Response
     {
-        $validator = Validator::make($request->all(), [
-            'expo_token'    =>  'required|string',
-        ]);
+        $interest = $this
+            ->expoChannel
+            ->interestName($request->user());
 
-        if ($validator->fails()) {
-            return new JsonResponse([
-                'status' => 'failed',
-                'error' => [
-                    'message' => 'Expo Token is required',
-                ],
-            ], 422);
-        }
+        $this
+            ->expoChannel
+            ->expo
+            ->subscribe($interest, $request->validated('expo_token'));
 
-        $token = $request->get('expo_token');
-
-        $interest = $this->expoChannel->interestName(Auth::user());
-
-        try {
-            $this->expoChannel->expo->subscribe($interest, $token);
-        } catch (\Exception $e) {
-            return new JsonResponse([
-                'status'    => 'failed',
-                'error'     =>  [
-                    'message' => $e->getMessage(),
-                ],
-            ], 500);
-        }
-
-        return new JsonResponse([
-            'status'    =>  'succeeded',
-            'expo_token' => $token,
-        ], 200);
+        return response()->noContent();
     }
 
-    public function unsubscribe(Request $request): JsonResponse
+    public function unsubscribe(UnsubscribeRequest $request): Response
     {
-        $interest = $this->expoChannel->interestName(Auth::user());
+        $interest = $this
+            ->expoChannel
+            ->interestName($request->user());
 
-        $validator = Validator::make($request->all(), [
-            'expo_token'    =>  'sometimes|string',
-        ]);
+        $this
+            ->expoChannel
+            ->expo
+            ->unsubscribe($interest, $request->validated('expo_token'));
 
-        if ($validator->fails()) {
-            return new JsonResponse([
-                'status' => 'failed',
-                'error' => [
-                    'message' => 'Expo Token is invalid',
-                ],
-            ], 422);
-        }
-
-        $token = $request->get('expo_token') ?: null;
-
-        try {
-            $deleted = $this->expoChannel->expo->unsubscribe($interest, $token);
-        } catch (\Exception $e) {
-            return new JsonResponse([
-                'status'    => 'failed',
-                'error'     =>  [
-                    'message' => $e->getMessage(),
-                ],
-            ], 500);
-        }
-
-        return new JsonResponse(['deleted' => $deleted]);
+        return response()->noContent();
     }
 }

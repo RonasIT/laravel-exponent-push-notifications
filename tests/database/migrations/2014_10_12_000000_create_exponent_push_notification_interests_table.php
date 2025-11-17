@@ -6,12 +6,9 @@ use Illuminate\Database\Migrations\Migration;
 
 class CreateExponentPushNotificationInterestsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up()
+    public function up(): void
     {
-        Schema::create(config('exponent-push-notifications.interests.database.table_name'), function (Blueprint $table) {
+        Schema::create('exponent_push_notification_interests', function (Blueprint $table) {
             $table->increments('id');
             $table->string('key')->index();
             $table->string('value');
@@ -20,11 +17,8 @@ class CreateExponentPushNotificationInterestsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down()
+    public function down(): void
     {
-        Schema::drop(config('exponent-push-notifications.interests.database.table_name'));
+        Schema::dropIfExists('exponent_push_notification_interests');
     }
 }

@@ -2,89 +2,56 @@
 
 namespace NotificationChannels\ExpoPushNotifications\Test;
 
-use Illuminate\Support\Arr;
 use NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvider;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use RonasIT\Support\Traits\FixturesTrait;
+use NotificationChannels\ExpoPushNotifications\Test\database\Models\User;
+use ExponentPhpSDK\ExpoRepository;
+use NotificationChannels\ExpoPushNotifications\ExpoChannel;
+use ExponentPhpSDK\Expo;
+use ExponentPhpSDK\ExpoRegistrar;
 
 abstract class TestCase extends OrchestraTestCase
 {
     use FixturesTrait;
 
-    /**
-     * Get package providers.
-     *
-     * @param  \Illuminate\Foundation\Application  $app
-     * @return array
-     */
-    protected function getPackageProviders($app)
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
+        $this->loadTestDump();
+
+        if (config('database.default') === 'pgsql') {
+            $this->prepareSequences();
+        }
+    }
+
+    protected function getPackageProviders($app): array
     {
         return [
             ExpoPushNotificationsServiceProvider::class,
         ];
     }
 
-    /**
-     * Define environment setup.
-     *
-     * @param  \Illuminate\Foundation\Application  $app
-     * @return void
-     */
-    public function getEnvironmentSetUp($app)
+    public function getEnvironmentSetUp($app): void
     {
-        $app['config']->set('database.default', 'sqlite');
-
-        $app['config']->set('database.connections.sqlite', [
-            'driver' => 'sqlite',
-            'database' => $this->getDatabaseDirectory().'/database.sqlite',
-            'prefix' => '',
-        ]);
+        $this->setupDb($app);
 
         $app['config']->set('auth.providers.users.model', User::class);
+        $app['config']->set('exponent-push-notifications.middleware', []);
     }
 
-    /**
-     * Sets up the database.
-     *
-     * @return void
-     */
-    protected function setUpDatabase()
+    protected function setupDb($app): void
     {
-        $this->resetDatabase();
-
-        $this->createExponentPushNotificationInterestsTable();
-    }
-
-    /**
-     * Drops the database.
-     *
-     * @return void
-     */
-    protected function resetDatabase()
-    {
-        file_put_contents(__DIR__.'/temp'.'/database.sqlite', null);
-    }
-
-    /**
-     * Creates the interests table.
-     *
-     * @return void
-     */
-    protected function createExponentPushNotificationInterestsTable()
-    {
-        include_once '__DIR__'.'/../migrations/create_exponent_push_notification_interests_table.php.stub';
-
-        (new \CreateExponentPushNotificationInterestsTable())->up();
-    }
-
-    /**
-     * Gets the directory path for the testing database.
-     *
-     * @return string
-     */
-    public function getDatabaseDirectory(): string
-    {
-        return __DIR__.'/temp';
+        $app['config']->set('database.default', env('DB_CONNECTION', 'pgsql'));
+        $app['config']->set('database.connections.pgsql', [
+            'driver' => env('DB_DRIVER', 'pgsql'),
+            'host' => env('DB_HOST', 'pgsql'),
+            'database' => env('DB_DATABASE', 'forge'),
+            'username' => env('DB_USERNAME', 'forge'),
+            'password' => env('DB_PASSWORD', 'secret'),
+        ]);
     }
 
     public function getFixturePath(string $fixtureName): string
@@ -92,5 +59,15 @@ abstract class TestCase extends OrchestraTestCase
         list($className) = extract_last_part(get_class($this), '\\');
 
         return getcwd() . "/tests/fixtures/{$className}/{$fixtureName}";
+    }
+
+    protected function bindExpoRepository(ExpoRepository $driver): void
+    {
+        $this->app->bind(ExpoRepository::class, fn () => $driver);
+
+        $this->app->bind(ExpoChannel::class, fn ($app) => new ExpoChannel(
+            expo: new Expo(new ExpoRegistrar($driver)),
+            events: $app['events']
+        ));
     }
 }
