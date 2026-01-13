@@ -17,9 +17,10 @@
         "laravel/framework": ">=11.34"
     },
     "require-dev": {
+        "laravel/pint": "^1.27",
         "mockery/mockery": "^1.6.12",
-        "phpunit/phpunit": "^11.5.5",
         "orchestra/testbench": "^10.4",
+        "phpunit/phpunit": "^11.5.5",
         "ronasit/laravel-helpers": "^3.5.8"
     },
     "autoload": {
