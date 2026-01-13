@@ -44,8 +44,6 @@ class Interest extends Model
 
     /**
      * Interest constructor.
-     *
-     * @param  array  $attributes
      */
     public function __construct(array $attributes = [])
     {

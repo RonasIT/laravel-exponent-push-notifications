@@ -2,11 +2,11 @@
 
 namespace NotificationChannels\ExpoPushNotifications\Http;
 
+use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use NotificationChannels\ExpoPushNotifications\ExpoChannel;
 use NotificationChannels\ExpoPushNotifications\Http\Requests\SubscribeRequest;
 use NotificationChannels\ExpoPushNotifications\Http\Requests\UnsubscribeRequest;
-use Illuminate\Http\Response;
 
 class ExpoController extends Controller
 {

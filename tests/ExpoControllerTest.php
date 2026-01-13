@@ -2,13 +2,13 @@
 
 namespace NotificationChannels\ExpoPushNotifications\Test;
 
+use ExponentPhpSDK\ExpoRepository;
 use ExponentPhpSDK\Repositories\ExpoFileDriver;
+use NotificationChannels\ExpoPushNotifications\Models\Interest;
 use NotificationChannels\ExpoPushNotifications\Repositories\ExpoDatabaseDriver;
 use NotificationChannels\ExpoPushNotifications\Test\database\Models\User;
-use NotificationChannels\ExpoPushNotifications\Models\Interest;
 use NotificationChannels\ExpoPushNotifications\Test\Support\ModelTestState;
 use PHPUnit\Framework\Attributes\DataProvider;
-use ExponentPhpSDK\ExpoRepository;
 
 class ExpoControllerTest extends TestCase
 {
