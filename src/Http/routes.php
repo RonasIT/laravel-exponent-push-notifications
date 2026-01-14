@@ -1,7 +1,7 @@
 <?php
 
-use NotificationChannels\ExpoPushNotifications\Http\ExpoController;
 use Illuminate\Support\Facades\Route;
+use NotificationChannels\ExpoPushNotifications\Http\ExpoController;
 
 Route::prefix('exponent/devices')
     ->middleware('expo.middleware')

@@ -2,14 +2,14 @@
 
 namespace NotificationChannels\ExpoPushNotifications\Test;
 
-use NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvider;
-use Orchestra\Testbench\TestCase as OrchestraTestCase;
-use RonasIT\Support\Traits\FixturesTrait;
-use NotificationChannels\ExpoPushNotifications\Test\database\Models\User;
-use ExponentPhpSDK\ExpoRepository;
-use NotificationChannels\ExpoPushNotifications\ExpoChannel;
 use ExponentPhpSDK\Expo;
 use ExponentPhpSDK\ExpoRegistrar;
+use ExponentPhpSDK\ExpoRepository;
+use NotificationChannels\ExpoPushNotifications\ExpoChannel;
+use NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvider;
+use NotificationChannels\ExpoPushNotifications\Test\database\Models\User;
+use Orchestra\Testbench\TestCase as OrchestraTestCase;
+use RonasIT\Support\Traits\FixturesTrait;
 
 abstract class TestCase extends OrchestraTestCase
 {
@@ -67,7 +67,7 @@ abstract class TestCase extends OrchestraTestCase
 
         $this->app->bind(ExpoChannel::class, fn ($app) => new ExpoChannel(
             expo: new Expo(new ExpoRegistrar($driver)),
-            events: $app['events']
+            events: $app['events'],
         ));
     }
 }
