@@ -19,54 +19,47 @@ class MessageTest extends TestCase
         $this->message = new ExpoMessage();
     }
 
-    /** @test */
-    public function itProvidesACreateMethod()
+    public function testProvidesACreateMethod()
     {
         $message = ExpoMessage::create('myMessage');
 
         $this->assertEquals('myMessage', Arr::get($message->toArray(), 'body'));
     }
 
-    /** @test */
-    public function itCanAcceptsABodyWhenConstructingAMessage()
+    public function testCanAcceptsABodyWhenConstructingAMessage()
     {
         $message = new ExpoMessage('myMessage');
 
         $this->assertEquals('myMessage', Arr::get($message->toArray(), 'body'));
     }
 
-    /** @test */
-    public function itProvidesACreateMethodThatAcceptsAMessageBody()
+    public function testProvidesACreateMethodThatAcceptsAMessageBody()
     {
         $message = new ExpoMessage('myMessage');
 
         $this->assertEquals('myMessage', Arr::get($message->toArray(), 'body'));
     }
 
-    /** @test */
-    public function itSetsABodyToTheMessage()
+    public function testSetsABodyToTheMessage()
     {
         $this->message->body('myMessage');
 
         $this->assertEquals('myMessage', Arr::get($this->message->toArray(), 'body'));
     }
 
-    /** @test */
-    public function itSetsADefaultSound()
+    public function testSetsADefaultSound()
     {
         $this->assertEquals('default', Arr::get($this->message->toArray(), 'sound'));
     }
 
-    /** @test */
-    public function itCanMuteSound()
+    public function testCanMuteSound()
     {
         $this->message->disableSound();
 
         $this->assertNull(Arr::get($this->message->toArray(), 'sound'));
     }
 
-    /** @test */
-    public function itCanEnableSound()
+    public function testCanEnableSound()
     {
         $this->message->disableSound();
         $this->message->enableSound();
@@ -74,32 +67,28 @@ class MessageTest extends TestCase
         $this->assertNotNull(Arr::get($this->message->toArray(), 'sound'));
     }
 
-    /** @test */
-    public function itCanSetTheBadge()
+    public function testCanSetTheBadge()
     {
         $this->message->badge(5);
 
         $this->assertEquals(5, Arr::get($this->message->toArray(), 'badge'));
     }
 
-    /** @test */
-    public function itCanSetTimeToLive()
+    public function testCanSetTimeToLive()
     {
         $this->message->setTtl(60);
 
         $this->assertEquals(60, Arr::get($this->message->toArray(), 'ttl'));
     }
 
-    /** @test */
-    public function itCanSetChannelId()
+    public function testCanSetChannelId()
     {
         $this->message->setChannelId('some-channel');
 
         $this->assertEquals('some-channel', Arr::get($this->message->toArray(), 'channelId'));
     }
 
-    /** @test */
-    public function itCanSetJSONData()
+    public function testCanSetJSONData()
     {
         $this->message->setJsonData('{"name":"Aly"}');
 

@@ -1,6 +1,6 @@
 services:
     nginx:
-        image: ghcr.io/ronasit/php-nginx-dev:8.3
+        image: ghcr.io/ronasit/php-nginx-dev:8.4
         working_dir: /app
         ports:
             - 80:80
@@ -12,7 +12,7 @@ services:
         user: root
 
     pgsql:
-        image: ronasit/postgres:12.5
+        image: postgres:18.3
         ports:
             - 5432:5432
         environment:
