@@ -33,13 +33,6 @@ class MessageTest extends TestCase
         $this->assertEquals('myMessage', Arr::get($message->toArray(), 'body'));
     }
 
-    public function testProvidesACreateMethodThatAcceptsAMessageBody()
-    {
-        $message = new ExpoMessage('myMessage');
-
-        $this->assertEquals('myMessage', Arr::get($message->toArray(), 'body'));
-    }
-
     public function testSetsABodyToTheMessage()
     {
         $this->message->body('myMessage');
