@@ -26,7 +26,7 @@ class MessageTest extends TestCase
         $this->assertEquals('myMessage', Arr::get($message->toArray(), 'body'));
     }
 
-    public function testCanAcceptsABodyWhenConstructingAMessage()
+    public function testCanAcceptBodyWhenConstructingMessage()
     {
         $message = new ExpoMessage('myMessage');
 
