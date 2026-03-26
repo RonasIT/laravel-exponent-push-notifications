@@ -5,7 +5,7 @@ namespace NotificationChannels\ExpoPushNotifications\Test;
 use ExponentPhpSDK\ExpoRepository;
 use ExponentPhpSDK\Repositories\ExpoFileDriver;
 use NotificationChannels\ExpoPushNotifications\Models\Interest;
-use NotificationChannels\ExpoPushNotifications\Repositories\ExpoDatabaseDriver;
+use NotificationChannels\ExpoPushNotifications\Repositories\ExpoTokenRepository;
 use NotificationChannels\ExpoPushNotifications\Test\database\Models\User;
 use NotificationChannels\ExpoPushNotifications\Test\Support\ModelTestState;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -30,7 +30,7 @@ class ExpoControllerTest extends TestCase
     public static function getExpoDriver(): array
     {
         return [
-            ['driver' => new ExpoDatabaseDriver()],
+            ['driver' => new ExpoTokenRepository()],
             ['driver' => new ExpoFileDriver()],
         ];
     }
@@ -46,7 +46,7 @@ class ExpoControllerTest extends TestCase
 
         $response->assertNoContent();
 
-        if ($driver instanceof ExpoDatabaseDriver) {
+        if ($driver instanceof ExpoTokenRepository) {
             self::$interestTestState->assertChangesEqualsFixture('subscribe');
         }
     }
@@ -75,7 +75,7 @@ class ExpoControllerTest extends TestCase
 
         $response->assertNoContent();
 
-        if ($driver instanceof ExpoDatabaseDriver) {
+        if ($driver instanceof ExpoTokenRepository) {
             self::$interestTestState->assertChangesEqualsFixture('unsubscribe');
         }
     }
