@@ -9,4 +9,3 @@
 /.scrutinizer.yml export-ignore
 /tests export-ignore
 pint.json export-ignore
-CLAUDE.md export-ignore
