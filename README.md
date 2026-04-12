@@ -11,8 +11,8 @@ This package provides an Expo push notification channel for Laravel, enabling yo
 
 -   [Installation](#installation)
 -   [Usage](#usage)
-    -   [Message customization](#message-customization)
     -   [Push tokens API](#push-tokens-api)
+    -   [Message customization](#message-customization)
     -   [Routing a message](#routing-a-message)
 -   [Changelog](#changelog)
 -   [Testing](#testing)
@@ -70,6 +70,8 @@ php artisan migrate
 
 ## Usage
 
+To send an Expo push notification, add `ExpoChannel::class` to the `via()` method of your notification class and implement the `toExpoPush()` method:
+
 ```php
 use App\Models\User;
 use NotificationChannels\ExpoPushNotifications\ExpoChannel;
@@ -92,37 +94,6 @@ class AccountApproved extends Notification
             ->body("Your {$notifiable->service} account was approved!");
     }
 }
-```
-
-### Message customization
-
-`ExpoMessage` may be customized using the following methods:
-
-| Method | Description | Notes |
-|--------|-------------|-------|
-| `title(string $value)` | Sets the notification title | Default: `null` |
-| `body(string $value)` | Sets the notification body | Default: `''` |
-| `enableSound()` | Enables the notification sound | Sets sound to `'default'` |
-| `disableSound()` | Mutes the notification sound | Sets sound to `null` |
-| `badge(int $value)` | Sets the badge count on the app icon | Default: `0` |
-| `setTtl(int $ttl)` | Sets the time to live in seconds | Default: `0` |
-| `setJsonData(array\|string $data)` | Sets additional payload data | Accepts array or JSON string.<br>Throws `CouldNotCreateMessage` on invalid JSON |
-| `setChannelId(string $channelId)` | Sets the notification channel ID | Android only |
-| `priority(PriorityEnum $priority)` | Sets the delivery priority | Default: `PriorityEnum::Default`.<br>Available: `::Default`, `::Normal`, `::High` |
-| `setInterruptionLevel(InterruptionLevelEnum $value)` | Sets the interruption level | iOS only.<br>Available: `InterruptionLevelEnum::Active`, `::Critical`, `::Passive`, `::TimeSensitive` |
-
-For example, to send a high-priority time-sensitive notification on iOS:
-
-```php
-use NotificationChannels\ExpoPushNotifications\ExpoMessage;
-use NotificationChannels\ExpoPushNotifications\Enums\PriorityEnum;
-use NotificationChannels\ExpoPushNotifications\Enums\InterruptionLevelEnum;
-
-ExpoMessage::create()
-    ->title('Important!')
-    ->body('This is a critical alert.')
-    ->priority(PriorityEnum::High)
-    ->setInterruptionLevel(InterruptionLevelEnum::TimeSensitive);
 ```
 
 ### Push tokens API
@@ -156,6 +127,37 @@ Route::expo(ExpoRouterActionEnum::Subscribe);
 
 // Unsubscribe only:
 Route::expo(ExpoRouterActionEnum::Unsubscribe);
+```
+
+### Message customization
+
+`ExpoMessage` may be customized using the following methods:
+
+| Method | Description | Notes |
+|--------|-------------|-------|
+| `title` | Sets the notification title | Default: `null` |
+| `body` | Sets the notification body | Default: `''` |
+| `enableSound` | Enables the notification sound | Sets sound to `'default'` |
+| `disableSound` | Mutes the notification sound | Sets sound to `null` |
+| `badge` | Sets the badge count on the app icon | Default: `0` |
+| `setTtl` | Sets the time to live in seconds | Default: `0` |
+| `setJsonData` | Sets additional payload data | Accepts array or JSON string.<br>Throws `CouldNotCreateMessage` on invalid JSON |
+| `setChannelId` | Sets the notification channel ID | Android only |
+| `priority` | Sets the delivery priority | Default: `PriorityEnum::Default`.<br>Available: `::Default`, `::Normal`, `::High` |
+| `setInterruptionLevel` | Sets the interruption level | iOS only.<br>Available: `InterruptionLevelEnum::Active`, `::Critical`, `::Passive`, `::TimeSensitive` |
+
+For example, to send a high-priority time-sensitive notification on iOS:
+
+```php
+use NotificationChannels\ExpoPushNotifications\ExpoMessage;
+use NotificationChannels\ExpoPushNotifications\Enums\PriorityEnum;
+use NotificationChannels\ExpoPushNotifications\Enums\InterruptionLevelEnum;
+
+ExpoMessage::create()
+    ->title('Important!')
+    ->body('This is a critical alert.')
+    ->priority(PriorityEnum::High)
+    ->setInterruptionLevel(InterruptionLevelEnum::TimeSensitive);
 ```
 
 ### Routing a message
