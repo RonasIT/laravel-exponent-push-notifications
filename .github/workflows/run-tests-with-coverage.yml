@@ -1,4 +1,4 @@
-name: Run tests with coverage
+name: Run tests
 
 on:
   push:
@@ -6,63 +6,73 @@ on:
   pull_request:
     branches: [ "master" ]
 
-jobs:
-  tests-with-coverage:
-    runs-on: ubuntu-latest
-    env:
-        DB_CONNECTION: pgsql
-        DB_HOST: 127.0.0.1
-        DB_PORT: 5432
-        DB_DATABASE: forge
-        DB_USERNAME: forge
-        DB_PASSWORD: secret
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  PHP_LATEST: &php-latest "8.5"
+  LARAVEL_LATEST: &laravel-latest "13.*"
 
-    services:
-        postgres:
-            image: postgres
-            env:
-                POSTGRES_DB: forge
-                POSTGRES_USER: forge
-                POSTGRES_PASSWORD: secret
-            options: >-
-                --health-cmd pg_isready
-                --health-interval 10s
-                --health-timeout 5s
-                --health-retries 5
-            ports:
-                - 5432:5432
+jobs:
+  tests:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: [ "8.3", "8.4" ]
+        php-version: [ "8.3", "8.4", "8.5" ]
         laravel-version: [ "11.*", "12.*", "13.*" ]
-        phpunit-version: [ "11.*", "12.*", "13.*" ]
         exclude:
-          - php-version: "8.3"
-            phpunit-version: "13.*"
-          - laravel-version: "11.*"
-            phpunit-version: "13.*"
+          - php-version: *php-latest
+            laravel-version: *laravel-latest
+    env: &db-env
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: forge
+      DB_USERNAME: forge
+      DB_PASSWORD: secret
+    services: &postgres-service
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_DB: forge
+          POSTGRES_USER: forge
+          POSTGRES_PASSWORD: secret
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     steps:
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup
+        uses: ./.github/actions/php-laravel-setup
         with:
           php-version: ${{ matrix.php-version }}
-          coverage: xdebug
-          tools: composer
+          laravel-version: ${{ matrix.laravel-version }}
+          coverage: none
+      - name: Execute unit tests via PHPUnit
+        run: vendor/bin/phpunit
+
+  tests-with-coverage:
+    runs-on: ubuntu-latest
+    env: *db-env
+    services: *postgres-service
+    steps:
       - name: Checkout
-        uses: actions/checkout@v4
-      - name: Install Laravel version
-        run: composer require "laravel/framework:${{ matrix.laravel-version }}" --no-update -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-      - name: Install PHPUnit version
-        run: composer require --dev "phpunit/phpunit:${{ matrix.phpunit-version }}" --no-update -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-      - name: Install dependencies
-        run: composer update -W -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+        uses: actions/checkout@v6
+      - name: Setup
+        uses: ./.github/actions/php-laravel-setup
+        with:
+          php-version: *php-latest
+          laravel-version: *laravel-latest
+          coverage: xdebug
       - name: Format code style via Pint
         run: vendor/bin/pint --test
       - name: Execute unit tests via PHPUnit with coverage
         run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
       - name: Export coverage report
-        if: ${{ matrix.php-version == '8.4' && matrix.laravel-version == '13.*' && matrix.phpunit-version == '13.*' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: clover.xml
           path: build/logs
@@ -74,9 +84,9 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Import coverage report
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: clover.xml
           path: build/logs
