@@ -5,7 +5,7 @@ namespace NotificationChannels\ExpoPushNotifications\Repositories;
 use ExponentPhpSDK\ExpoRepository;
 use NotificationChannels\ExpoPushNotifications\Models\Interest;
 
-class ExpoDatabaseDriver implements ExpoRepository
+class ExpoTokenRepository implements ExpoRepository
 {
     /**
      * Stores an Expo token with a given identifier.
