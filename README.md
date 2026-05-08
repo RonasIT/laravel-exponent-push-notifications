@@ -23,23 +23,13 @@ This package provides an Expo push notification channel for Laravel, enabling yo
 
 ## Installation
 
-You can install the package via composer:
+Install the package via composer:
 
 ```bash
 composer require ronasit/laravel-exponent-push-notifications
 ```
 
-If you are using Laravel 5.5 or higher this package will automatically register itself using [Package Discovery](https://laravel.com/docs/5.5/packages#package-discovery). For older versions of Laravel you must install the service provider manually:
-
-```php
-// config/app.php
-'providers' => [
-    ...
-    NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvider::class,
-],
-```
-
-You can optionally publish the config file with:
+Publish the config file (optionally):
 
 ```bash
 php artisan vendor:publish --provider="NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvider" --tag="config"
