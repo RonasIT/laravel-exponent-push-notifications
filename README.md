@@ -88,7 +88,7 @@ class AccountApproved extends Notification
 
 ### Push tokens API
 
-The package automatically registers two endpoints for managing device subscriptions:
+The package automatically registers the following endpoints for managing device subscriptions:
 
 #### `POST /exponent/devices/subscribe`
 
@@ -104,7 +104,7 @@ The package automatically registers two endpoints for managing device subscripti
 
 The middleware applied to these endpoints is configured via the `middleware` key in the config file.
 
-The package registers both endpoints automatically. To customize their middleware, prefix, or guards, call `Route::expo()` in your routes file — this disables the automatic registration:
+The package registers all endpoints automatically. To customize their middleware, prefix, or guards, call `Route::expo()` in your routes file — this disables the automatic registration:
 
 ```php
 // In routes/api.php
