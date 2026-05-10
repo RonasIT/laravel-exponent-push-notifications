@@ -29,5 +29,7 @@ class ExpoRouterCustomizationTest extends TestCase
             prefix: 'custom/prefix',
             middleware: ['custom.middleware'],
         );
+
+        $this->assertTrue(ExpoRouter::$isBlockedBaseRoutes);
     }
 }

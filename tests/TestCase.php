@@ -106,6 +106,18 @@ abstract class TestCase extends OrchestraTestCase
         }
     }
 
+    protected function assertExpoRoutesCount(): void
+    {
+        $expoRoutes = collect(Route::getRoutes()->getRoutes())
+            ->filter(fn (LaravelRoute $route) => str_contains($route->getActionName(), ExpoController::class));
+
+        $this->assertCount(
+            expectedCount: count(ExpoRouter::ROUTES),
+            haystack: $expoRoutes,
+            message: 'Registered expo routes count does not match expected.',
+        );
+    }
+
     private function findRegisteredRoute(string $method, string $uri): ?LaravelRoute
     {
         return collect(Route::getRoutes()->getRoutesByMethod()[$method])

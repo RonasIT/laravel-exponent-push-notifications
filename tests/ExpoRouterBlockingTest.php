@@ -2,10 +2,8 @@
 
 namespace NotificationChannels\ExpoPushNotifications\Test;
 
-use Illuminate\Support\Facades\Route;
 use NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvider;
 use NotificationChannels\ExpoPushNotifications\ExpoRouter;
-use NotificationChannels\ExpoPushNotifications\Http\ExpoController;
 use NotificationChannels\ExpoPushNotifications\Test\Support\Providers\ExpoMacroCallerProvider;
 
 class ExpoRouterBlockingTest extends TestCase
@@ -29,13 +27,8 @@ class ExpoRouterBlockingTest extends TestCase
     {
         $this->assertExpoRoutesRegistered();
 
-        $expoRoutes = collect(Route::getRoutes()->getRoutes())
-            ->filter(fn ($route) => str_contains($route->getActionName(), ExpoController::class));
+        $this->assertTrue(ExpoRouter::$isBlockedBaseRoutes);
 
-        $this->assertCount(
-            expectedCount: count(ExpoRouter::ROUTES),
-            haystack: $expoRoutes,
-            message: 'Default routes were not blocked, resulting in duplicate route registrations.',
-        );
+        $this->assertExpoRoutesCount();
     }
 }
