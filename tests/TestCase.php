@@ -5,8 +5,12 @@ namespace NotificationChannels\ExpoPushNotifications\Test;
 use ExponentPhpSDK\Expo;
 use ExponentPhpSDK\ExpoRegistrar;
 use ExponentPhpSDK\ExpoRepository;
+use Illuminate\Routing\Route as LaravelRoute;
+use Illuminate\Support\Facades\Route;
 use NotificationChannels\ExpoPushNotifications\ExpoChannel;
 use NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvider;
+use NotificationChannels\ExpoPushNotifications\ExpoRouter;
+use NotificationChannels\ExpoPushNotifications\Http\ExpoController;
 use NotificationChannels\ExpoPushNotifications\Test\database\Models\User;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use RonasIT\Support\Traits\FixturesTrait;
@@ -69,5 +73,42 @@ abstract class TestCase extends OrchestraTestCase
             expo: new Expo(new ExpoRegistrar($driver)),
             events: $app['events'],
         ));
+    }
+
+    protected function assertExpoRoutesRegistered(
+        string $prefix = ExpoRouter::DEFAULT_PREFIX,
+        array $middleware = [ExpoRouter::DEFAULT_MIDDLEWARE],
+    ): void {
+        foreach (ExpoRouter::ROUTES as $route) {
+            $expectedUri = ltrim("{$prefix}/{$route['uri']}", '/');
+            $method = strtoupper($route['method']);
+
+            $registeredRoute = $this->findRegisteredRoute($method, $expectedUri);
+
+            $this->assertNotNull(
+                actual: $registeredRoute,
+                message: "Route [{$method}] {$expectedUri} is not registered.",
+            );
+
+            $this->assertEquals(
+                expected: ExpoController::class . '@' . $route['action'],
+                actual: $registeredRoute->getActionName(),
+                message: "Route [{$method}] {$expectedUri} has wrong action.",
+            );
+
+            foreach ($middleware as $middlewareEntry) {
+                $this->assertContains(
+                    needle: $middlewareEntry,
+                    haystack: $registeredRoute->gatherMiddleware(),
+                    message: "Route [{$method}] {$expectedUri} missing middleware [{$middlewareEntry}].",
+                );
+            }
+        }
+    }
+
+    private function findRegisteredRoute(string $method, string $uri): ?LaravelRoute
+    {
+        return collect(Route::getRoutes()->getRoutesByMethod()[$method])
+            ->first(fn (LaravelRoute $route) => $route->uri() === $uri);
     }
 }

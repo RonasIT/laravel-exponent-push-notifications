@@ -2,36 +2,39 @@
 
 namespace NotificationChannels\ExpoPushNotifications;
 
-use Illuminate\Support\Arr;
-use NotificationChannels\ExpoPushNotifications\Enum\ExpoRouterActionEnum;
+use Closure;
 use NotificationChannels\ExpoPushNotifications\Http\ExpoController;
 
 class ExpoRouter
 {
     public static bool $isBlockedBaseRoutes = false;
 
-    public function expo()
+    public const string DEFAULT_PREFIX = 'exponent/devices';
+    public const string DEFAULT_MIDDLEWARE = 'expo.middleware';
+
+    public const array ROUTES = [
+        ['method' => 'post', 'uri' => 'subscribe', 'action' => 'subscribe'],
+        ['method' => 'post', 'uri' => 'unsubscribe', 'action' => 'unsubscribe'],
+    ];
+
+    public function expo(): Closure
     {
-        return function (ExpoRouterActionEnum ...$options) {
+        return function (
+            string $prefix = ExpoRouter::DEFAULT_PREFIX,
+            array|string $middleware = ExpoRouter::DEFAULT_MIDDLEWARE,
+        ) {
             ExpoRouter::$isBlockedBaseRoutes = true;
 
-            $routerActions = array_column(ExpoRouterActionEnum::cases(), 'value');
-
-            $defaultOptions = array_fill_keys($routerActions, true);
-
-            if (!empty($options)) {
-                $options = collect($options);
-
-                $defaultOptions = Arr::map($defaultOptions, fn ($value, $defaultOption) => $options->contains('value', $defaultOption));
-            }
-
             $this->group([
-                'prefix' => 'exponent/devices',
-                'middleware' => 'expo.middleware',
-            ], function () use ($defaultOptions) {
-                $this->controller(ExpoController::class)->group(function () use ($defaultOptions) {
-                    when($defaultOptions['subscribe'], fn () => $this->post('subscribe', 'subscribe'));
-                    when($defaultOptions['unsubscribe'], fn () => $this->post('unsubscribe', 'unsubscribe'));
+                'prefix' => $prefix,
+                'middleware' => $middleware,
+            ], function () {
+                $this->controller(ExpoController::class)->group(function () {
+                    foreach (ExpoRouter::ROUTES as $route) {
+                        $method = $route['method'];
+
+                        $this->{$method}($route['uri'], $route['action']);
+                    }
                 });
             });
         };

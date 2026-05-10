@@ -104,19 +104,19 @@ The package automatically registers two endpoints for managing device subscripti
 
 The middleware applied to these endpoints is configured via the `middleware` key in the config file.
 
-By default, both endpoints are registered automatically by the ServiceProvider. Calling `Route::expo()` in your own routes file registers the same routes, giving you full control over middleware, prefixes, and guards:
+The package registers both endpoints automatically. To customize their middleware, prefix, or guards, call `Route::expo()` in your routes file — this disables the automatic registration:
 
 ```php
-use NotificationChannels\ExpoPushNotifications\Enum\ExpoRouterActionEnum;
+// In routes/api.php
 
-// Register both routes:
+// Use defaults:
 Route::expo();
 
-// Subscribe only:
-Route::expo(ExpoRouterActionEnum::Subscribe);
-
-// Unsubscribe only:
-Route::expo(ExpoRouterActionEnum::Unsubscribe);
+// Custom prefix and middleware:
+Route::expo(
+    prefix: 'api/expo', 
+    middleware: ['api', 'auth:sanctum'],
+);
 ```
 
 ### Message customization

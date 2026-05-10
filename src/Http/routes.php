@@ -1,13 +1,15 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use NotificationChannels\ExpoPushNotifications\ExpoRouter;
 use NotificationChannels\ExpoPushNotifications\Http\ExpoController;
 
-Route::prefix('exponent/devices')
-    ->middleware('expo.middleware')
+Route::prefix(ExpoRouter::DEFAULT_PREFIX)
+    ->middleware(ExpoRouter::DEFAULT_MIDDLEWARE)
     ->group(function () {
         Route::controller(ExpoController::class)->group(function () {
-            Route::post('subscribe', 'subscribe');
-            Route::post('unsubscribe', 'unsubscribe');
+            foreach (ExpoRouter::ROUTES as $route) {
+                Route::{$route['method']}($route['uri'], $route['action']);
+            }
         });
     });
