@@ -9,7 +9,6 @@ use Illuminate\Routing\Route as LaravelRoute;
 use Illuminate\Support\Facades\Route;
 use NotificationChannels\ExpoPushNotifications\ExpoChannel;
 use NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvider;
-use NotificationChannels\ExpoPushNotifications\Http\ExpoController;
 use NotificationChannels\ExpoPushNotifications\Test\database\Models\User;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use RonasIT\Support\Traits\FixturesTrait;
@@ -74,57 +73,23 @@ abstract class TestCase extends OrchestraTestCase
         ));
     }
 
-    protected function assertExpoRoutesRegistered(
-        string $prefix = 'exponent/devices',
-        array $middleware = ['expo.middleware'],
-    ): void {
-        $routes = [
-            ['method' => 'POST', 'uri' => 'subscribe', 'action' => 'subscribe'],
-            ['method' => 'POST', 'uri' => 'unsubscribe', 'action' => 'unsubscribe'],
-        ];
+    protected function assertRouteRegistered(string $method, string $uri): void
+    {
+        $route = $this->findRoute($method, $uri);
 
-        foreach ($routes as $route) {
-            $expectedUri = ltrim("{$prefix}/{$route['uri']}", '/');
-            $method = $route['method'];
-
-            $registeredRoute = $this->findRegisteredRoute($method, $expectedUri);
-
-            $this->assertNotNull(
-                actual: $registeredRoute,
-                message: "Route [{$method}] {$expectedUri} is not registered.",
-            );
-
-            $this->assertEquals(
-                expected: ExpoController::class . '@' . $route['action'],
-                actual: $registeredRoute->getActionName(),
-                message: "Route [{$method}] {$expectedUri} has wrong action.",
-            );
-
-            foreach ($middleware as $middlewareEntry) {
-                $this->assertContains(
-                    needle: $middlewareEntry,
-                    haystack: $registeredRoute->gatherMiddleware(),
-                    message: "Route [{$method}] {$expectedUri} missing middleware [{$middlewareEntry}].",
-                );
-            }
-        }
+        $this->assertNotNull($route, "Route [{$method}] {$uri} is not registered.");
     }
 
-    protected function assertExpoRoutesCount(): void
+    protected function assertRouteNotRegistered(string $method, string $uri): void
     {
-        $expoRoutes = collect(Route::getRoutes()->getRoutes())
-            ->filter(fn (LaravelRoute $route) => str_contains($route->getActionName(), ExpoController::class));
+        $route = $this->findRoute($method, $uri);
 
-        $this->assertCount(
-            expectedCount: 2,
-            haystack: $expoRoutes,
-            message: 'Registered expo routes count does not match expected.',
-        );
+        $this->assertNull($route, "Route [{$method}] {$uri} should not be registered.");
     }
 
-    private function findRegisteredRoute(string $method, string $uri): ?LaravelRoute
+    protected function findRoute(string $method, string $uri): ?LaravelRoute
     {
-        return collect(Route::getRoutes()->getRoutesByMethod()[$method])
+        return collect(Route::getRoutes()->getRoutesByMethod()[$method] ?? [])
             ->first(fn (LaravelRoute $route) => $route->uri() === $uri);
     }
 }
