@@ -19,7 +19,7 @@ class ExpoPushNotificationsServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Route::mixin(new ExpoRouter());
+        Route::macro('expo', fn () => ExpoRouter::routes());
 
         $this->setupConfig();
 

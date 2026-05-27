@@ -9,7 +9,6 @@ use Illuminate\Routing\Route as LaravelRoute;
 use Illuminate\Support\Facades\Route;
 use NotificationChannels\ExpoPushNotifications\ExpoChannel;
 use NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvider;
-use NotificationChannels\ExpoPushNotifications\ExpoRouter;
 use NotificationChannels\ExpoPushNotifications\Http\ExpoController;
 use NotificationChannels\ExpoPushNotifications\Test\database\Models\User;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
@@ -76,12 +75,17 @@ abstract class TestCase extends OrchestraTestCase
     }
 
     protected function assertExpoRoutesRegistered(
-        string $prefix = ExpoRouter::DEFAULT_PREFIX,
-        array $middleware = [ExpoRouter::DEFAULT_MIDDLEWARE],
+        string $prefix = 'exponent/devices',
+        array $middleware = ['expo.middleware'],
     ): void {
-        foreach (ExpoRouter::ROUTES as $route) {
+        $routes = [
+            ['method' => 'POST', 'uri' => 'subscribe', 'action' => 'subscribe'],
+            ['method' => 'POST', 'uri' => 'unsubscribe', 'action' => 'unsubscribe'],
+        ];
+
+        foreach ($routes as $route) {
             $expectedUri = ltrim("{$prefix}/{$route['uri']}", '/');
-            $method = strtoupper($route['method']);
+            $method = $route['method'];
 
             $registeredRoute = $this->findRegisteredRoute($method, $expectedUri);
 
@@ -112,7 +116,7 @@ abstract class TestCase extends OrchestraTestCase
             ->filter(fn (LaravelRoute $route) => str_contains($route->getActionName(), ExpoController::class));
 
         $this->assertCount(
-            expectedCount: count(ExpoRouter::ROUTES),
+            expectedCount: 2,
             haystack: $expoRoutes,
             message: 'Registered expo routes count does not match expected.',
         );
