@@ -5,7 +5,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/RonasIT/laravel-exponent-push-notifications/badge.svg?branch=master)](https://coveralls.io/github/RonasIT/laravel-exponent-push-notifications?branch=master)
 [![Total Downloads](https://img.shields.io/packagist/dt/ronasit/laravel-exponent-push-notifications.svg?style=flat-square)](https://packagist.org/packages/ronasit/laravel-exponent-push-notifications)
 
-This package provides an Expo push notification channel for Laravel, enabling you to send notifications to mobile devices via the [Expo SDK](https://docs.expo.dev/push-notifications/overview/).
+This package provides an Expo push notification channel for Laravel, allowing you to send notifications to mobile devices via the [Expo SDK](https://docs.expo.dev/push-notifications/overview/).
 
 ## Contents
 
@@ -39,10 +39,10 @@ php artisan vendor:publish --provider="NotificationChannels\ExpoPushNotification
 
 Package provides several drivers to store the push tokens:
 
-| Driver | When to use |
-|--------|-------------|
-| `file` (default) | Simple setups, single-server, no database required |
-| `database` | Multi-server deployments, persistent storage, flexible queries |
+| Driver           | When to use                                                    |
+|------------------|----------------------------------------------------------------|
+| `file` (default) | Simple setups, single-server, no database required             |
+| `database`       | Multi-server deployments, persistent storage, flexible queries |
 
 Storage driver may be configured via the `EXPONENT_PUSH_NOTIFICATION_INTERESTS_STORAGE_DRIVER` env variable.
 
@@ -92,49 +92,45 @@ The package automatically registers the following endpoints for managing device 
 
 #### `POST /exponent/devices/subscribe`
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `expo_token` | string | Yes | The Expo push token of the device to subscribe |
+| Field        | Type   | Required | Description                                    |
+|--------------|--------|----------|------------------------------------------------|
+| `expo_token` | string | Yes      | The Expo push token of the device to subscribe |
 
 #### `POST /exponent/devices/unsubscribe`
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `expo_token` | string | No | The Expo push token to remove. If omitted, all tokens for the authenticated user are removed |
+| Field        | Type   | Required | Description                                                                                      |
+|--------------|--------|----------|:-------------------------------------------------------------------------------------------------|
+| `expo_token` | string | No       | The Expo push token to remove. If omitted, all tokens for the authenticated user will be removed |
 
 The middleware applied to these endpoints is configured via the `middleware` key in the config file.
 
 The package registers all endpoints automatically. To customize their middleware, prefix, or guards, call `Route::expo()` in your routes file — this disables the automatic registration:
 
 ```php
-// In routes/api.php
-
-// Use defaults:
-Route::expo();
-
-// Custom prefix and middleware:
-Route::expo(
-    prefix: 'api/expo', 
-    middleware: ['api', 'auth:sanctum'],
-);
+Route::prefix('v{version}')->group(function () {
+    Route::middleware('auth_group')->group(function () {
+        // other routes
+        Route::expo();
+    });
+});
 ```
 
 ### Message customization
 
 `ExpoMessage` may be customized using the following methods:
 
-| Method | Description | Notes |
-|--------|-------------|-------|
-| `title` | Sets the notification title | Default: `null` |
-| `body` | Sets the notification body | Default: `''` |
-| `enableSound` | Enables the notification sound | Sets sound to `'default'` |
-| `disableSound` | Mutes the notification sound | Sets sound to `null` |
-| `badge` | Sets the badge count on the app icon | Default: `0` |
-| `setTtl` | Sets the time to live in seconds | Default: `0` |
-| `setJsonData` | Sets additional payload data | Accepts array or JSON string.<br>Throws `CouldNotCreateMessage` on invalid JSON |
-| `setChannelId` | Sets the notification channel ID | Android only |
-| `priority` | Sets the delivery priority | Default: `PriorityEnum::Default`.<br>Available: `::Default`, `::Normal`, `::High` |
-| `setInterruptionLevel` | Sets the interruption level | iOS only.<br>Available: `InterruptionLevelEnum::Active`, `::Critical`, `::Passive`, `::TimeSensitive` |
+| Method                 | Description                          | Notes                                                                                                 |
+|------------------------|--------------------------------------|-------------------------------------------------------------------------------------------------------|
+| `title`                | Sets the notification title          | Default: `null`                                                                                       |
+| `body`                 | Sets the notification body           | Default: `''`                                                                                         |
+| `enableSound`          | Enables the notification sound       | Sets sound to `'default'`                                                                             |
+| `disableSound`         | Mutes the notification sound         | Sets sound to `null`                                                                                  |
+| `badge`                | Sets the badge count on the app icon | Default: `0`                                                                                          |
+| `setTtl`               | Sets the time to live in seconds     | Default: `0`                                                                                          |
+| `setJsonData`          | Sets additional payload data         | Accepts array or JSON string.<br>Throws `CouldNotCreateMessage` on invalid JSON                       |
+| `setChannelId`         | Sets the notification channel ID     | Android only                                                                                          |
+| `priority`             | Sets the delivery priority           | Default: `PriorityEnum::Default`.<br>Available: `::Default`, `::Normal`, `::High`                     |
+| `setInterruptionLevel` | Sets the interruption level          | iOS only.<br>Available: `InterruptionLevelEnum::Active`, `::Critical`, `::Passive`, `::TimeSensitive` |
 
 For example, to send a high-priority time-sensitive notification on iOS:
 
