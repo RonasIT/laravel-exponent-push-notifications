@@ -5,10 +5,15 @@
 [![Coverage Status](https://coveralls.io/repos/github/RonasIT/laravel-exponent-push-notifications/badge.svg?branch=master)](https://coveralls.io/github/RonasIT/laravel-exponent-push-notifications?branch=master)
 [![Total Downloads](https://img.shields.io/packagist/dt/ronasit/laravel-exponent-push-notifications.svg?style=flat-square)](https://packagist.org/packages/ronasit/laravel-exponent-push-notifications)
 
+This package provides an Expo push notification channel for Laravel, allowing you to send notifications to mobile devices via the [Expo SDK](https://docs.expo.dev/push-notifications/overview/).
+
 ## Contents
 
 -   [Installation](#installation)
--   [Usage](#usage) - [Available Message methods](#available-message-methods)
+-   [Usage](#usage)
+    -   [Push tokens API](#push-tokens-api)
+    -   [Message customization](#message-customization)
+    -   [Routing a message](#routing-a-message)
 -   [Changelog](#changelog)
 -   [Testing](#testing)
 -   [Security](#security)
@@ -18,81 +23,59 @@
 
 ## Installation
 
-You can install the package via composer:
+Install the package via composer:
 
 ```bash
-composer require alymosul/laravel-exponent-push-notifications
+composer require ronasit/laravel-exponent-push-notifications
 ```
 
-If you are using Laravel 5.5 or higher this package will automatically register itself using [Package Discovery](https://laravel.com/docs/5.5/packages#package-discovery). For older versions of Laravel you must install the service provider manually:
-
-```php
-// config/app.php
-'providers' => [
-    ...
-    NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvider::class,
-],
-
-```
-
-Before publish exponent notification migration you must add in .env file:
-
-```bash
-EXPONENT_PUSH_NOTIFICATION_INTERESTS_STORAGE_DRIVER=database
-```
-
-You can publish the migration with:
-
-```bash
-php artisan vendor:publish --provider="NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvider" --tag="migrations"
-```
-
-After publishing the migration you can create the `exponent_push_notification_interests` table by running the migrations:
-
-```bash
-php artisan migrate
-```
-
-You can optionally publish the config file with:
+Publish the config file (optionally):
 
 ```bash
 php artisan vendor:publish --provider="NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvider" --tag="config"
 ```
 
-This is the contents of the published config file:
+### Storage Drivers
 
-```php
-return [
-    'interests' => [
-        /*
-         * Supported: "file", "database"
-         */
-        'driver' => env('EXPONENT_PUSH_NOTIFICATION_INTERESTS_STORAGE_DRIVER', 'file'),
+Package provides several drivers to store the push tokens:
 
-        'database' => [
-            'events' => [],
+| Driver           | When to use                                                    |
+|------------------|----------------------------------------------------------------|
+| `file` (default) | Simple setups, single-server, no database required             |
+| `database`       | Multi-server deployments, persistent storage, flexible queries |
 
-            'table_name' => 'exponent_push_notification_interests',
-        ],
-    ]
-];
+Storage driver may be configured via the `EXPONENT_PUSH_NOTIFICATION_INTERESTS_STORAGE_DRIVER` env variable.
+
+#### Database driver
+
+To use the `database` driver need to publish and run package migration:
+
+```bash
+php artisan vendor:publish --provider="NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvider" --tag="migrations"
+php artisan migrate
 ```
+
+> [!IMPORTANT]
+> The migration uses the table name defined in `interests.database.table_name` from the config (`exponent_push_notification_interests` by default).
 
 ## Usage
 
+To send an Expo push notification, add `ExpoChannel::class` to the `via()` method of your notification class and implement the `toExpoPush()` method:
+
 ```php
+use App\Models\User;
 use NotificationChannels\ExpoPushNotifications\ExpoChannel;
 use NotificationChannels\ExpoPushNotifications\ExpoMessage;
 use Illuminate\Notifications\Notification;
 
 class AccountApproved extends Notification
 {
-    public function via($notifiable)
+    public function via(User $notifiable): array
     {
         return [ExpoChannel::class];
     }
 
-    public function toExpoPush($notifiable)
+    public function toExpoPush(User $notifiable): ExpoMessage
     {
         return ExpoMessage::create()
             ->badge(1)
@@ -103,41 +86,101 @@ class AccountApproved extends Notification
 }
 ```
 
-### Available Message methods
+### Push tokens API
 
-A list of all available options
+The package automatically registers the following endpoints for managing device subscriptions:
 
--   `title('')`: Accepts a string value for the title.
--   `body('')`: Accepts a string value for the body.
--   `enableSound()`: Enables the notification sound.
--   `disableSound()`: Mutes the notification sound.
--   `badge(1)`: Accepts an integer value for the badge.
--   `ttl(60)`: Accepts an integer value for the time to live.
--   `setJsonData('')`: Accepts a json string or an array for additional.
--   `channelID('')`: Accepts a string to set the channelId of the notification for Android devices.
--   `priority('default')`: Accepts a string to set the priority of the notification, must be one of [default, normal, high].
+#### `POST /exponent/devices/subscribe`
 
-### Managing Recipients
+| Field        | Type   | Required | Description                                    |
+|--------------|--------|----------|------------------------------------------------|
+| `expo_token` | string | Yes      | The Expo push token of the device to subscribe |
 
-This package registers two endpoints that handle the subscription of recipients, the endpoints are defined in src/Http/routes.php file, used by ExpoController and all loaded through the package service provider.
+#### `POST /exponent/devices/unsubscribe`
+
+| Field        | Type   | Required | Description                                                                                      |
+|--------------|--------|----------|:-------------------------------------------------------------------------------------------------|
+| `expo_token` | string | No       | The Expo push token to remove. If omitted, all tokens for the authenticated user will be removed |
+
+The middleware applied to these endpoints is configured via the `middleware` key in the config file.
+
+The package registers all endpoints automatically. To customize their middleware, prefix, or guards, call `Route::expo()` in your routes file — this disables the automatic registration:
+
+```php
+Route::prefix('v{version}')->group(function () {
+    Route::middleware('auth_group')->group(function () {
+        // other routes
+        Route::expo();
+    });
+});
+```
+
+### Message customization
+
+`ExpoMessage` may be customized using the following methods:
+
+| Method                 | Description                          | Notes                                                                                                 |
+|------------------------|--------------------------------------|-------------------------------------------------------------------------------------------------------|
+| `title`                | Sets the notification title          | Default: `null`                                                                                       |
+| `body`                 | Sets the notification body           | Default: `''`                                                                                         |
+| `enableSound`          | Enables the notification sound       | Sets sound to `'default'`                                                                             |
+| `disableSound`         | Mutes the notification sound         | Sets sound to `null`                                                                                  |
+| `badge`                | Sets the badge count on the app icon | Default: `0`                                                                                          |
+| `setTtl`               | Sets the time to live in seconds     | Default: `0`                                                                                          |
+| `setJsonData`          | Sets additional payload data         | Accepts array or JSON string.<br>Throws `CouldNotCreateMessage` on invalid JSON                       |
+| `setChannelId`         | Sets the notification channel ID     | Android only                                                                                          |
+| `priority`             | Sets the delivery priority           | Default: `PriorityEnum::Default`.<br>Available: `::Default`, `::Normal`, `::High`                     |
+| `setInterruptionLevel` | Sets the interruption level          | iOS only.<br>Available: `InterruptionLevelEnum::Active`, `::Critical`, `::Passive`, `::TimeSensitive` |
+
+For example, to send a high-priority time-sensitive notification on iOS:
+
+```php
+use NotificationChannels\ExpoPushNotifications\ExpoMessage;
+use NotificationChannels\ExpoPushNotifications\Enums\PriorityEnum;
+use NotificationChannels\ExpoPushNotifications\Enums\InterruptionLevelEnum;
+
+ExpoMessage::create()
+    ->title('Important!')
+    ->body('This is a critical alert.')
+    ->priority(PriorityEnum::High)
+    ->setInterruptionLevel(InterruptionLevelEnum::TimeSensitive);
+```
 
 ### Routing a message
 
-By default the exponent "interest" messages will be sent to will be defined using the {notifiable}.{id} convention, for example `App.User.1`, however you can change this behaviour by including a `routeNotificationForExpoPushNotifications()` in the notifiable class method that returns the interest name.
+An **interest** is a named subscription that links a device's push token to a logical target (e.g. a specific user). When sending a notification, the package looks up all tokens registered under that interest and delivers the message to them.
+
+By default, the interest that a message is sent to is derived from the notifiable model using the `{ClassName}.{id}` convention (e.g. `App.Models.User.1`).
+
+You can override this by adding a `routeNotificationForExpoPushNotifications()` method to your notifiable model:
+
+```php
+use Illuminate\Notifications\Notifiable;
+
+class User extends Model
+{
+    use Notifiable;
+
+    public function routeNotificationForExpoPushNotifications(): string
+    {
+        return 'App.Models.User.' . $this->id;
+    }
+}
+```
 
 ## Changelog
 
-Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recently.
+Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
 
 ## Testing
 
 ```bash
-$ composer test
+composer test
 ```
 
 ## Security
 
-If you discover any security related issues, please email alymosul@gmail.com instead of using the issue tracker.
+If you discover any security related issues, please use the [GitHub issue tracker](https://github.com/RonasIT/laravel-exponent-push-notifications/issues).
 
 ## Contributing
 
@@ -145,7 +188,8 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## Credits
 
--   [Aly Suleiman](https://github.com/Alymosul)
+-   [Aly Suleiman](https://github.com/Alymosul) — original author
+-   [RonasIT](https://github.com/RonasIT)
 -   [All Contributors](../../contributors)
 
 ## License

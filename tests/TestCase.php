@@ -5,6 +5,8 @@ namespace NotificationChannels\ExpoPushNotifications\Test;
 use ExponentPhpSDK\Expo;
 use ExponentPhpSDK\ExpoRegistrar;
 use ExponentPhpSDK\ExpoRepository;
+use Illuminate\Routing\Route as LaravelRoute;
+use Illuminate\Support\Facades\Route;
 use NotificationChannels\ExpoPushNotifications\ExpoChannel;
 use NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvider;
 use NotificationChannels\ExpoPushNotifications\Test\database\Models\User;
@@ -69,5 +71,25 @@ abstract class TestCase extends OrchestraTestCase
             expo: new Expo(new ExpoRegistrar($driver)),
             events: $app['events'],
         ));
+    }
+
+    protected function assertRouteRegistered(string $method, string $uri): void
+    {
+        $route = $this->findRoute($method, $uri);
+
+        $this->assertNotNull($route, "Route [{$method}] {$uri} is not registered.");
+    }
+
+    protected function assertRouteNotRegistered(string $method, string $uri): void
+    {
+        $route = $this->findRoute($method, $uri);
+
+        $this->assertNull($route, "Route [{$method}] {$uri} should not be registered.");
+    }
+
+    protected function findRoute(string $method, string $uri): ?LaravelRoute
+    {
+        return collect(Route::getRoutes()->getRoutesByMethod()[$method] ?? [])
+            ->first(fn (LaravelRoute $route) => $route->uri() === $uri);
     }
 }
