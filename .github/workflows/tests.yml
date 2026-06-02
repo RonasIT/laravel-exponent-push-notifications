@@ -1,0 +1,13 @@
+name: Tests
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  run-tests:
+    uses: ronasit/github-actions/.github/workflows/tests.yml@main
+    with:
+      use-database: true
