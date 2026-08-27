@@ -29,6 +29,12 @@ Install the package via composer:
 composer require ronasit/laravel-exponent-push-notifications
 ```
 
+Publish the config file (optionally):
+
+```bash
+php artisan vendor:publish --provider="NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvider" --tag="config"
+```
+
 Publish and run the migration (required for the default `database` driver):
 
 > [!IMPORTANT]
@@ -37,12 +43,6 @@ Publish and run the migration (required for the default `database` driver):
 ```bash
 php artisan vendor:publish --provider="NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvider" --tag="migrations"
 php artisan migrate
-```
-
-Publish the config file (optionally):
-
-```bash
-php artisan vendor:publish --provider="NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvider" --tag="config"
 ```
 
 ### Storage Drivers
