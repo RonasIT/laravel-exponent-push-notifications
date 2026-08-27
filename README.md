@@ -29,6 +29,16 @@ Install the package via composer:
 composer require ronasit/laravel-exponent-push-notifications
 ```
 
+Publish and run the migration (required for the default `database` driver):
+
+> [!IMPORTANT]
+> The migration uses the table name defined in `interests.database.table_name` from the config (`exponent_push_notification_interests` by default). To customize it, publish the config first and set `interests.database.table_name` before running the migration.
+
+```bash
+php artisan vendor:publish --provider="NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvider" --tag="migrations"
+php artisan migrate
+```
+
 Publish the config file (optionally):
 
 ```bash
@@ -45,18 +55,6 @@ Package provides several drivers to store the push tokens:
 | `database` (default) | Multi-server deployments, persistent storage, flexible queries |
 
 Storage driver may be configured via the `EXPONENT_PUSH_NOTIFICATION_INTERESTS_STORAGE_DRIVER` env variable.
-
-#### Database driver
-
-To use the `database` driver need to publish and run package migration:
-
-```bash
-php artisan vendor:publish --provider="NotificationChannels\ExpoPushNotifications\ExpoPushNotificationsServiceProvider" --tag="migrations"
-php artisan migrate
-```
-
-> [!IMPORTANT]
-> The migration uses the table name defined in `interests.database.table_name` from the config (`exponent_push_notification_interests` by default).
 
 ## Usage
 
