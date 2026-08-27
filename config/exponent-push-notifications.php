@@ -15,7 +15,7 @@ return [
     'debug' => env('EXPONENT_PUSH_NOTIFICATION_DEBUG', true),
 
     'interests' => [
-        'driver' => env('EXPONENT_PUSH_NOTIFICATION_INTERESTS_STORAGE_DRIVER', 'file'),
+        'driver' => env('EXPONENT_PUSH_NOTIFICATION_INTERESTS_STORAGE_DRIVER', 'database'),
 
         'database' => [
             'events' => [],
