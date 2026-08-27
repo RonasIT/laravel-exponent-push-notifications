@@ -39,10 +39,10 @@ php artisan vendor:publish --provider="NotificationChannels\ExpoPushNotification
 
 Package provides several drivers to store the push tokens:
 
-| Driver           | When to use                                                    |
-|------------------|----------------------------------------------------------------|
-| `file` (default) | Simple setups, single-server, no database required             |
-| `database`       | Multi-server deployments, persistent storage, flexible queries |
+| Driver               | When to use                                                    |
+|----------------------|-----------------------------------------------------------------|
+| `file`               | Simple setups, single-server, no database required             |
+| `database` (default) | Multi-server deployments, persistent storage, flexible queries |
 
 Storage driver may be configured via the `EXPONENT_PUSH_NOTIFICATION_INTERESTS_STORAGE_DRIVER` env variable.
 
